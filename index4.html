@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Интервальный Таймер</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        /* Цветовые схемы для разных состояний */
+        body.state-idle {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f8fafc;
+        }
+
+        body.state-work {
+            background: linear-gradient(135deg, #064e3b 0%, #0284c7 100%);
+            color: #ffffff;
+        }
+
+        body.state-rest {
+            background: linear-gradient(135deg, #831843 0%, #f59e0b 100%);
+            color: #ffffff;
+        }
+
+        body.state-prepare {
+            background: linear-gradient(135deg, #312e81 0%, #4c1d95 100%);
+            color: #ffffff;
+        }
+
+        /* Круговой прогресс бар */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.3s linear, stroke 0.8s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Glassmorphism стеклянные панели */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Анимации кнопок */
+        .btn-action {
+            transition: all 0.2s ease;
+        }
+        .btn-action:active {
+            transform: scale(0.95);
+        }
+
+        /* Пульсация текста фазы */
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.85; transform: scale(1.02); }
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="state-idle min-h-screen flex flex-col items-center justify-center p-4 selection:bg-white/20">
+
+    <div class="w-full max-w-lg mx-auto flex flex-col gap-6">
+
+        <!-- Заголовок -->
+        <header class="text-center">
+            <h1 class="text-3xl sm:text-4xl font-black tracking-tight flex items-center justify-center gap-3">
+                <i class="fa-solid fa-stopwatch text-2xl opacity-90"></i>
+                Интервальный Таймер
+            </h1>
+            <p id="sub-title" class="text-sm opacity-80 mt-1 font-medium">Настройте интервалы и начните тренировку</p>
+        </header>
+
+        <!-- Главная карточка таймера -->
+        <main class="glass-panel rounded-3xl p-6 sm:p-8 flex flex-col items-center justify-center relative overflow-hidden">
+
+            <!-- Диаграмма / Круговой прогресс -->
+            <div class="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center my-2">
+                <svg class="w-full h-full" viewBox="0 0 200 200">
+                    <!-- Фоновый круг -->
+                    <circle
+                        class="opacity-20"
+                        stroke="currentColor"
+                        stroke-width="10"
+                        fill="transparent"
+                        r="85"
+                        cx="100"
+                        cy="100"
+                    />
+                    <!-- Прогресс круг -->
+                    <circle
+                        id="progress-circle"
+                        class="progress-ring__circle"
+                        stroke="currentColor"
+                        stroke-width="10"
+                        stroke-linecap="round"
+                        fill="transparent"
+                        r="85"
+                        cx="100"
+                        cy="100"
+                    />
+                </svg>
+
+                <!-- Внутреннее содержимое таймера -->
+                <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                    <span id="phase-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 mb-2 animate-pulse-subtle">
+                        Готов
+                    </span>
+                    
+                    <div id="time-display" class="text-5xl sm:text-6xl font-black tracking-tighter my-1 tabular-nums drop-shadow-md">
+                        00:30
+                    </div>
+
+                    <div id="round-display" class="text-sm font-semibold opacity-90 mt-1">
+                        Раунд: <span id="current-round">1</span> / <span id="total-rounds-display">8</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Управляющие кнопки -->
+            <div class="flex items-center gap-4 mt-6 w-full justify-center">
+                <button id="btn-start" class="btn-action flex-1 py-4 px-6 rounded-2xl bg-white text-slate-900 font-extrabold text-lg shadow-lg hover:bg-opacity-90 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-play text-xl"></i>
+                    <span>Старт</span>
+                </button>
+
+                <button id="btn-pause" class="btn-action flex-1 py-4 px-6 rounded-2xl bg-amber-400 text-slate-950 font-extrabold text-lg shadow-lg hover:bg-amber-300 hidden flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-pause text-xl"></i>
+                    <span>Пауза</span>
+                </button>
+
+                <button id="btn-reset" class="btn-action py-4 px-5 rounded-2xl bg-white/15 hover:bg-white/25 font-bold text-lg backdrop-blur-md flex items-center justify-center">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- Настройки таймера -->
+        <section id="settings-panel" class="glass-panel rounded-3xl p-6 transition-all duration-500">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-sm opacity-80"></i>
+                Настройки интервалов
+            </h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Время работы -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>
+                        Работа (сек)
+                    </label>
+                    <div class="flex items-center">
+                        <input type="number" id="input-work" min="1" max="3600" value="30" class="glass-input w-full px-3 py-2.5 rounded-xl font-bold text-lg text-center">
+                    </div>
+                </div>
+
+                <!-- Время отдыха -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider flex items-center gap-1.5">
+                        <span class="w-2.5 h-2.5 rounded-full bg-rose-400 inline-block"></span>
+                        Отдых (сек)
+                    </label>
+                    <div class="flex items-center">
+                        <input type="number" id="input-rest" min="1" max="3600" value="10" class="glass-input w-full px-3 py-2.5 rounded-xl font-bold text-lg text-center">
+                    </div>
+                </div>
+
+                <!-- Раунды -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-semibold opacity-80 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-repeat text-xs opacity-70"></i>
+                        Циклы
+                    </label>
+                    <div class="flex items-center">
+                        <input type="number" id="input-rounds" min="1" max="99" value="8" class="glass-input w-full px-3 py-2.5 rounded-xl font-bold text-lg text-center">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Звуковые настройки -->
+            <div class="mt-5 pt-4 border-t border-white/10 flex items-center justify-between text-sm">
+                <span class="font-medium opacity-90 flex items-center gap-2">
+                    <i class="fa-solid fa-volume-high opacity-80"></i>
+                    Звуковой сигнал
+                </span>
+                <button id="btn-toggle-sound" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 font-semibold text-xs transition">
+                    Включен
+                </button>
+            </div>
+        </section>
+
+        <!-- Футер -->
+        <footer class="text-center text-xs opacity-60 font-medium">
+            Интервальный таймер &bull; Работа / Отдых / Повтор
+        </footer>
+    </div>
+
+    <!-- Модальное окно завершения -->
+    <div id="finish-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-white/20 rounded-3xl p-8 max-w-sm w-full text-center flex flex-col items-center gap-4 shadow-2xl">
+            <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center text-4xl mb-2 animate-bounce">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <h3 class="text-2xl font-black">Отличная работа!</h3>
+            <p class="text-sm opacity-80">Все запланированные циклы тренировки успешно завершены.</p>
+            <button id="btn-modal-close" class="w-full py-3 mt-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold rounded-xl transition">
+                Завершить
+            </button>
+        </div>
+    </div>
+
+    <!-- JavaScript логика -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Элементы
+            const body = document.body;
+            const timeDisplay = document.getElementById('time-display');
+            const phaseBadge = document.getElementById('phase-badge');
+            const currentRoundDisplay = document.getElementById('current-round');
+            const totalRoundsDisplay = document.getElementById('total-rounds-display');
+            const progressCircle = document.getElementById('progress-circle');
+            
+            const btnStart = document.getElementById('btn-start');
+            const btnPause = document.getElementById('btn-pause');
+            const btnReset = document.getElementById('btn-reset');
+            const btnToggleSound = document.getElementById('btn-toggle-sound');
+            
+            const inputWork = document.getElementById('input-work');
+            const inputRest = document.getElementById('input-rest');
+            const inputRounds = document.getElementById('input-rounds');
+            const settingsPanel = document.getElementById('settings-panel');
+            
+            const finishModal = document.getElementById('finish-modal');
+            const btnModalClose = document.getElementById('btn-modal-close');
+
+            // Расчет окружности для progress-ring
+            const radius = progressCircle.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+
+            // Состояния таймера
+            const PHASES = {
+                IDLE: 'idle',
+                PREPARE: 'prepare',
+                WORK: 'work',
+                REST: 'rest',
+                FINISHED: 'finished'
+            };
+
+            let currentPhase = PHASES.IDLE;
+            let workTime = parseInt(inputWork.value) || 30;
+            let restTime = parseInt(inputRest.value) || 10;
+            let totalRounds = parseInt(inputRounds.value) || 8;
+            
+            let currentRound = 1;
+            let timeRemaining = workTime;
+            let totalIntervalTime = workTime;
+            
+            let timerInterval = null;
+            let isRunning = false;
+            let soundEnabled = true;
+
+            // Web Audio API для звуков без внешних файлов
+            let audioCtx = null;
+
+            function initAudio() {
+                if (!audioCtx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        audioCtx = new AudioContext();
+                    }
+                }
+            }
+
+            function playBeep(freq = 600, type = 'sine', duration = 0.15, count = 1) {
+                if (!soundEnabled) return;
+                initAudio();
+                if (!audioCtx) return;
+
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                for (let i = 0; i < count; i++) {
+                    setTimeout(() => {
+                        try {
+                            const osc = audioCtx.createOscillator();
+                            const gain = audioCtx.createGain();
+                            
+                            osc.type = type;
+                            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                            
+                            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                            
+                            osc.connect(gain);
+                            gain.connect(audioCtx.destination);
+                            
+                            osc.start();
+                            osc.stop(audioCtx.currentTime + duration);
+                        } catch (e) {
+                            console.error('Audio error:', e);
+                        }
+                    }, i * (duration * 1000 + 100));
+                }
+            }
+
+            function playFanfare() {
+                if (!soundEnabled) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, idx) => {
+                    setTimeout(() => {
+                        playBeep(freq, 'triangle', 0.25, 1);
+                    }, idx * 150);
+                });
+            }
+
+            // Форматирование времени в мм:сс
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+            }
+
+            // Обновление кольцевого индикатора
+            function setProgress(percent) {
+                const offset = circumference - (percent / 100 * circumference);
+                progressCircle.style.strokeDashoffset = offset;
+            }
+
+            // Обновление интерфейса в зависимости от текущей фазы
+            function updateUI() {
+                timeDisplay.textContent = formatTime(timeRemaining);
+                currentRoundDisplay.textContent = currentRound;
+                totalRoundsDisplay.textContent = totalRounds;
+
+                // Процент прохождения текущей фазы
+                const percent = totalIntervalTime > 0 ? ((totalIntervalTime - timeRemaining) / totalIntervalTime) * 100 : 0;
+                setProgress(percent);
+
+                // Очищаем классы состояний body
+                body.className = "min-h-screen flex flex-col items-center justify-center p-4 selection:bg-white/20 ";
+
+                switch (currentPhase) {
+                    case PHASES.IDLE:
+                        body.classList.add('state-idle');
+                        phaseBadge.textContent = "Готов к старту";
+                        phaseBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 mb-2";
+                        break;
+
+                    case PHASES.PREPARE:
+                        body.classList.add('state-prepare');
+                        phaseBadge.textContent = "Приготовьтесь";
+                        phaseBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/40 mb-2 animate-pulse";
+                        break;
+
+                    case PHASES.WORK:
+                        body.classList.add('state-work');
+                        phaseBadge.textContent = "Работа";
+                        phaseBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/40 mb-2 animate-pulse-subtle";
+                        break;
+
+                    case PHASES.REST:
+                        body.classList.add('state-rest');
+                        phaseBadge.textContent = "Отдых";
+                        phaseBadge.className = "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/40 mb-2 animate-pulse-subtle";
+                        break;
+                }
+            }
+
+            // Запуск таймера
+            function startTimer() {
+                initAudio();
+                readInputs();
+
+                if (!isRunning) {
+                    isRunning = true;
+                    btnStart.classList.add('hidden');
+                    btnPause.classList.remove('hidden');
+                    disableInputs(true);
+
+                    if (currentPhase === PHASES.IDLE) {
+                        // Начинаем с подготовки (3 секунды)
+                        currentPhase = PHASES.PREPARE;
+                        timeRemaining = 3;
+                        totalIntervalTime = 3;
+                        playBeep(440, 'sine', 0.1);
+                    }
+
+                    updateUI();
+
+                    timerInterval = setInterval(() => {
+                        timeRemaining--;
+
+                        // Предупреждающий пик за 3 секунды до конца
+                        if (timeRemaining > 0 && timeRemaining <= 3) {
+                            playBeep(500, 'sine', 0.08);
+                        }
+
+                        if (timeRemaining < 0) {
+                            switchPhase();
+                        } else {
+                            updateUI();
+                        }
+                    }, 1000);
+                }
+            }
+
+            // Переключение фазы (Работа <-> Отдых)
+            function switchPhase() {
+                if (currentPhase === PHASES.PREPARE || currentPhase === PHASES.REST) {
+                    // Переходим к РАБОТЕ
+                    if (currentPhase === PHASES.REST) {
+                        currentRound++;
+                    }
+
+                    if (currentRound > totalRounds) {
+                        finishWorkout();
+                        return;
+                    }
+
+                    currentPhase = PHASES.WORK;
+                    timeRemaining = workTime;
+                    totalIntervalTime = workTime;
+                    playBeep(880, 'sine', 0.2, 2); // Двойной высокий сигнал
+                } else if (currentPhase === PHASES.WORK) {
+                    // Переходим к ОТДЫХУ
+                    if (currentRound >= totalRounds && restTime === 0) {
+                        finishWorkout();
+                        return;
+                    }
+
+                    currentPhase = PHASES.REST;
+                    timeRemaining = restTime;
+                    totalIntervalTime = restTime;
+                    playBeep(440, 'sine', 0.25, 1); // Низкий сигнал
+                }
+
+                updateUI();
+            }
+
+            // Пауза
+            function pauseTimer() {
+                if (isRunning) {
+                    isRunning = false;
+                    clearInterval(timerInterval);
+                    btnPause.classList.add('hidden');
+                    btnStart.classList.remove('hidden');
+                }
+            }
+
+            // Сброс
+            function resetTimer() {
+                pauseTimer();
+                currentPhase = PHASES.IDLE;
+                currentRound = 1;
+                readInputs();
+                timeRemaining = workTime;
+                totalIntervalTime = workTime;
+                disableInputs(false);
+                updateUI();
+            }
+
+            // Завершение всей тренировки
+            function finishWorkout() {
+                pauseTimer();
+                currentPhase = PHASES.IDLE;
+                playFanfare();
+                finishModal.classList.remove('hidden');
+                finishModal.classList.add('flex');
+                resetTimer();
+            }
+
+            // Считывание пользовательских настроек
+            function readInputs() {
+                workTime = Math.max(1, parseInt(inputWork.value) || 30);
+                restTime = Math.max(0, parseInt(inputRest.value) || 10);
+                totalRounds = Math.max(1, parseInt(inputRounds.value) || 8);
+                
+                if (currentPhase === PHASES.IDLE) {
+                    timeRemaining = workTime;
+                    totalIntervalTime = workTime;
+                }
+            }
+
+            function disableInputs(disabled) {
+                inputWork.disabled = disabled;
+                inputRest.disabled = disabled;
+                inputRounds.disabled = disabled;
+                if (disabled) {
+                    settingsPanel.classList.add('opacity-50', 'pointer-events-none');
+                } else {
+                    settingsPanel.classList.remove('opacity-50', 'pointer-events-none');
+                }
+            }
+
+            // Слушатели событий
+            btnStart.addEventListener('click', startTimer);
+            btnPause.addEventListener('click', pauseTimer);
+            btnReset.addEventListener('click', resetTimer);
+
+            btnToggleSound.addEventListener('click', () => {
+                soundEnabled = !soundEnabled;
+                btnToggleSound.textContent = soundEnabled ? 'Включен' : 'Выключен';
+                btnToggleSound.classList.toggle('bg-white/10', soundEnabled);
+                btnToggleSound.classList.toggle('bg-rose-500/30', !soundEnabled);
+            });
+
+            btnModalClose.addEventListener('click', () => {
+                finishModal.classList.add('hidden');
+                finishModal.classList.remove('flex');
+            });
+
+            // Обновление значения при изменении полей ввода
+            [inputWork, inputRest, inputRounds].forEach(input => {
+                input.addEventListener('change', () => {
+                    readInputs();
+                    updateUI();
+                });
+                input.addEventListener('keyup', () => {
+                    readInputs();
+                    updateUI();
+                });
+            });
+
+            // Инициализация первого отображения
+            resetTimer();
+        });
+    </script>
+</body>
+</html>

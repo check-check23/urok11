@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Architecture // Portfolio</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            bg: '#050714',
+                            card: '#0c1024',
+                            accent: '#00f0ff',
+                            pink: '#ff007f',
+                            gold: '#d4af37',
+                            purple: '#a855f7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                        serif: ['Cinzel', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050714;
+            color: #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #cyber-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-panel {
+            background: rgba(12, 16, 36, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-6px) scale(1.01);
+            background: rgba(20, 30, 60, 0.8);
+            border-color: rgba(0, 240, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 240, 255, 0.15);
+        }
+
+        .glow-text-cyan {
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+        }
+
+        .glow-text-pink {
+            text-shadow: 0 0 12px rgba(255, 0, 127, 0.6);
+        }
+
+        .cyber-btn {
+            background: linear-gradient(135deg, rgba(0,240,255,0.2) 0%, rgba(255,0,127,0.2) 100%);
+            border: 1px solid rgba(0, 240, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .cyber-btn:hover {
+            background: linear-gradient(135deg, rgba(0,240,255,0.5) 0%, rgba(255,0,127,0.5) 100%);
+            border-color: #00f0ff;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050714;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f0ff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="relative min-h-screen flex flex-col justify-between">
+
+    <canvas id="cyber-canvas"></canvas>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 glass-panel border-b border-cyber-accent/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyber-accent to-cyber-pink flex items-center justify-center text-black font-black text-xl shadow-[0_0_15px_#00f0ff]">
+                    N
+                </div>
+                <div>
+                    <h1 class="font-mono font-bold text-lg text-white tracking-wider flex items-center gap-2">
+                        NEXUS<span class="text-cyber-accent">.PORTFOLIO</span>
+                    </h1>
+                    <p class="text-[10px] text-slate-400 font-mono">10 ПРОЕКТОВ & ИНТЕРАКТИВОВ</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button id="sound-btn" class="px-3 py-2 rounded-xl glass-card text-xs font-mono text-cyber-accent hover:border-cyber-accent transition flex items-center gap-2">
+                    <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                    <span class="hidden sm:inline">SFX AUDIO</span>
+                </button>
+                <a href="#video-section" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white flex items-center gap-2">
+                    <i class="fa-solid fa-play text-cyber-pink"></i>
+                    <span>ВИДЕО И МУЗЫКА</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative z-10 flex-grow w-full space-y-12">
+
+        <!-- Hero Section -->
+        <section class="text-center space-y-4">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyber-accent/10 border border-cyber-accent/40 text-cyber-accent text-xs font-mono mb-2">
+                <i class="fa-solid fa-code-branch animate-pulse"></i> DIGITAL LAB & INTERACTIVE ENGINE
+            </div>
+            <h2 class="text-3xl sm:text-5xl font-black tracking-tight text-white font-serif">
+                Интерактивная Галерея <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyber-accent via-cyber-pink to-cyber-purple glow-text-cyan">Проектов</span>
+            </h2>
+            <p class="text-slate-400 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+                Нажмите «Запустить проект», чтобы мгновенно открыть любой из HTML-сервисов во встроенном окне предпросмотра.
+            </p>
+        </section>
+
+        <!-- Video Player Section -->
+        <section id="video-section" class="glass-panel p-6 sm:p-8 rounded-3xl border border-cyber-pink/40 shadow-2xl relative overflow-hidden">
+            <div class="flex items-center justify-between mb-6 border-b border-slate-700/60 pb-4">
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-video text-cyber-pink text-2xl"></i>
+                    <div>
+                        <h3 class="font-mono font-bold text-lg text-white">Видео и музыка</h3>
+                        <p class="text-xs text-slate-400">Файл: клип.mp4</p>
+                    </div>
+                </div>
+                <span class="text-xs font-mono text-cyber-pink px-3 py-1 rounded-full bg-cyber-pink/10 border border-cyber-pink/30">MEDIA PLAYER</span>
+            </div>
+
+            <div class="relative rounded-2xl overflow-hidden bg-black/80 aspect-video max-w-4xl mx-auto border border-slate-800 shadow-inner">
+                <video id="main-video-player" controls class="w-full h-full object-contain">
+                    <source src="клип.mp4" type="video/mp4">
+                    Ваш браузер не поддерживает воспроизведение видео.
+                </video>
+            </div>
+        </section>
+
+        <!-- Category Filters -->
+        <section class="flex flex-wrap items-center justify-center gap-3">
+            <button data-filter="all" class="filter-btn active px-4 py-2 rounded-xl text-xs font-mono font-bold bg-cyber-accent text-black shadow-[0_0_15px_#00f0ff] transition">Все проекты (10)</button>
+            <button data-filter="game" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold glass-card text-slate-300 hover:border-cyber-accent transition">Игры (3)</button>
+            <button data-filter="tool" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold glass-card text-slate-300 hover:border-cyber-accent transition">Инструменты (4)</button>
+            <button data-filter="biz" class="filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold glass-card text-slate-300 hover:border-cyber-accent transition">Бизнес и Прочее (3)</button>
+        </section>
+
+        <!-- Projects Grid -->
+        <section id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Project 1: game.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-purple-500/20 hover:border-purple-400/50" data-category="game">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/40 font-bold">GAME / RPG</span>
+                        <span class="text-xs text-slate-500 font-mono">game.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Битва Знаний</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Интерактивная RPG-викторина с боями против монстров, выбором предметных дисциплин и уровня сложности.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-purple-400 font-mono">HTML5 / Canvas / Audio</span>
+                    <button onclick="launchProject('game.html', 'Битва Знаний')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 2: HW.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-blue-500/20 hover:border-blue-400/50" data-category="game">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold">QUIZ / SCIENCE</span>
+                        <span class="text-xs text-slate-500 font-mono">HW.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Научная Викторина</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Научный квиз с детальной статистикой точности ответов, разбором предметов и космическим оформлением.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-blue-400 font-mono">Tailwind / Stats Engine</span>
+                    <button onclick="launchProject('HW.html', 'Научная Викторина')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 3: игра3.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-emerald-500/20 hover:border-emerald-400/50" data-category="game">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold">3D SIMULATOR</span>
+                        <span class="text-xs text-slate-500 font-mono">игра3.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">3D Симулятор Полета</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Реалистичный симулятор управления самолетом на Three.js с выбором скинов, локаций и стрельбой по шарам.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-emerald-400 font-mono">Three.js / WebGL / 3D</span>
+                    <button onclick="launchProject('игра3.html', '3D Симулятор Полета')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 4: index1.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-lime-500/20 hover:border-lime-400/50" data-category="tool">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-lime-500/20 text-lime-300 border border-lime-500/40 font-bold">ORGANIZER</span>
+                        <span class="text-xs text-slate-500 font-mono">index1.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Трекер привычек</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Элегантное оливковое веб-приложение для отслеживания ежедневных ритуалов и расчета стриков выполнения.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-lime-400 font-mono">LocalStorage / UI</span>
+                    <button onclick="launchProject('index1.html', 'Трекер привычек')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 5: index2.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-sky-500/20 hover:border-sky-400/50" data-category="tool">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40 font-bold">CALCULATOR</span>
+                        <span class="text-xs text-slate-500 font-mono">index2.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Конвертер величин</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Универсальный физический конвертер с анимированной графикой (весы, термометр, колба) и математической точностью.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-sky-400 font-mono">SVG Animations / Math</span>
+                    <button onclick="launchProject('index2.html', 'Конвертер величин')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 6: index3.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-cyber-pink/20 hover:border-cyber-pink/50" data-category="tool">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-cyber-pink/20 text-cyber-pink border border-cyber-pink/40 font-bold">SECURITY</span>
+                        <span class="text-xs text-slate-500 font-mono">index3.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">CyberPass Generator</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Генератор сверхстойких неоновых паролей на основе Crypto API с оценкой устойчивости и копированием.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-cyber-pink font-mono">Web Crypto API</span>
+                    <button onclick="launchProject('index3.html', 'CyberPass Generator')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 7: index5.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-fuchsia-500/20 hover:border-fuchsia-400/50" data-category="tool">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/40 font-bold">PRODUCTIVITY</span>
+                        <span class="text-xs text-slate-500 font-mono">index5.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Заметки и Сезоны</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Система ведения заметок с фильтрацией, подсветкой поиска и встроенным Canvas-движком сезонной анимации.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-fuchsia-400 font-mono">Canvas Engine / Notes</span>
+                    <button onclick="launchProject('index5.html', 'Заметки и Сезоны')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 8: бизнес идеи.html -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-amber-500/20 hover:border-amber-400/50" data-category="biz">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold">BUSINESS / CATALOG</span>
+                        <span class="text-xs text-slate-500 font-mono">бизнес идеи.html</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Imperium Ideas</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Премиум-каталог из 100 бизнес-концептов с фильтрацией, 3D-генератором случайных идей и экспортными чек-листами.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-amber-400 font-mono">3D Card Flip / Export</span>
+                    <button onclick="launchProject('бизнес идеи.html', 'Imperium Ideas')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Запустить</button>
+                </div>
+            </article>
+
+            <!-- Project 9: urok8.py -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-cyan-500/20 hover:border-cyan-400/50" data-category="biz">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">PYTHON / AI BOT</span>
+                        <span class="text-xs text-slate-500 font-mono">urok8.py</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Mistral Telegram Bot</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Код Telegram-бота на Python (Telebot) со встроенной интеграцией нейросети Mistral AI и обработкой команд.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-cyan-400 font-mono">Python / REST API</span>
+                    <button onclick="showCodeInfo('urok8.py')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Инфо</button>
+                </div>
+            </article>
+
+            <!-- Project 10: сакура 3.jpg -->
+            <article class="glass-card rounded-2xl p-6 flex flex-col justify-between border border-rose-500/20 hover:border-rose-400/50" data-category="biz">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-mono px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold">GRAPHICS / ART</span>
+                        <span class="text-xs text-slate-500 font-mono">сакура 3.jpg</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-white font-mono">Арт «4 Сезона Сакуры»</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed">Иллюстративный арт, демонстрирующий сакуру и восточный пейзаж в четыре времени года.</p>
+                </div>
+                <div class="pt-6 mt-4 border-t border-slate-800 flex items-center justify-between">
+                    <span class="text-xs text-rose-400 font-mono">Image Asset</span>
+                    <button onclick="showImageModal('сакура 3.jpg')" class="cyber-btn px-4 py-2 rounded-xl text-xs font-bold font-mono text-white">Просмотр</button>
+                </div>
+            </article>
+
+        </section>
+
+    </main>
+
+    <!-- Modal Launcher for Live Projects -->
+    <div id="preview-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex flex-col">
+        <div class="glass-panel p-4 flex items-center justify-between border-b border-cyber-accent/30">
+            <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-cyber-pink animate-ping"></span>
+                <h3 id="modal-project-title" class="font-mono font-bold text-white text-base">Запуск проекта</h3>
+            </div>
+            <div class="flex items-center gap-3">
+                <button onclick="reloadIframe()" class="px-3 py-1.5 rounded-lg glass-card text-xs font-mono text-cyber-accent hover:border-cyber-accent">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Перезапустить
+                </button>
+                <button onclick="closeModal()" class="w-9 h-9 rounded-lg bg-cyber-pink/20 text-cyber-pink hover:bg-cyber-pink hover:text-black transition flex items-center justify-center font-bold">
+                    ✕
+                </button>
+            </div>
+        </div>
+        <div class="flex-grow w-full h-full bg-slate-950 relative">
+            <iframe id="project-iframe" class="w-full h-full border-none" src="about:blank"></iframe>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md hidden flex-col items-center justify-center p-4" onclick="closeImageModal()">
+        <img src="сакура 3.jpg" class="max-w-full max-h-[90vh] rounded-2xl border border-cyber-accent/40 shadow-2xl object-contain">
+        <p class="text-xs font-mono text-slate-400 mt-4">Нажмите в любом месте, чтобы закрыть</p>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-6 border-t border-slate-800/80 text-center text-xs font-mono text-slate-500 z-10">
+        NEXUS PORTFOLIO ARCHITECTURE &copy; 2026
+    </footer>
+
+    <!-- Audio & Cyber Canvas Logic -->
+    <script>
+        // Web Audio SFX Synthesizer
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+            init() {
+                if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+        }
+        const sfx = new SoundEngine();
+
+        // Sound toggle
+        const soundBtn = document.getElementById('sound-btn');
+        const soundIcon = document.getElementById('sound-icon');
+        soundBtn.addEventListener('click', () => {
+            sfx.enabled = !sfx.enabled;
+            soundIcon.className = sfx.enabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark text-rose-500";
+        });
+
+        // Background Cyber Canvas
+        const canvas = document.getElementById('cyber-canvas');
+        const ctx = canvas.getContext('2d');
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        const particles = Array.from({ length: 40 }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 2 + 1
+        }));
+
+        function drawCanvas() {
+            ctx.clearRect(0, 0, width, height);
+            
+            // Grid
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
+            ctx.lineWidth = 1;
+            const step = 40;
+            for (let x = 0; x < width; x += step) {
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+            }
+            for (let y = 0; y < height; y += step) {
+                ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+            }
+
+            // Particles
+            particles.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0 || p.x > width) p.vx *= -1;
+                if (p.y < 0 || p.y > height) p.vy *= -1;
+
+                ctx.fillStyle = '#00f0ff';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            requestAnimationFrame(drawCanvas);
+        }
+        drawCanvas();
+
+        // Project Filters
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCards = document.querySelectorAll('#projects-grid article');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                sfx.playClick();
+                filterBtns.forEach(b => {
+                    b.classList.remove('bg-cyber-accent', 'text-black', 'shadow-[0_0_15px_#00f0ff]');
+                    b.classList.add('glass-card', 'text-slate-300');
+                });
+                btn.classList.add('bg-cyber-accent', 'text-black', 'shadow-[0_0_15px_#00f0ff]');
+                btn.classList.remove('glass-card', 'text-slate-300');
+
+                const filter = btn.dataset.filter;
+                projectCards.forEach(card => {
+                    if (filter === 'all' || card.dataset.category === filter) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Launch Modal
+        const previewModal = document.getElementById('preview-modal');
+        const projectIframe = document.getElementById('project-iframe');
+        const modalProjectTitle = document.getElementById('modal-project-title');
+
+        function launchProject(filename, title) {
+            sfx.playClick();
+            modalProjectTitle.textContent = title + ' (' + filename + ')';
+            projectIframe.src = filename;
+            previewModal.classList.remove('hidden');
+        }
+
+        function reloadIframe() {
+            sfx.playClick();
+            projectIframe.contentWindow.location.reload();
+        }
+
+        function closeModal() {
+            sfx.playClick();
+            projectIframe.src = 'about:blank';
+            previewModal.classList.add('hidden');
+        }
+
+        function showCodeInfo(filename) {
+            sfx.playClick();
+            alert('Файл ' + filename + ' представляет собой исходный код Telegram-бота на Python с интеграцией Mistral AI API.\nДля его запуска требуется интерпретатор Python и установленные библиотеки telebot и requests.');
+        }
+
+        function showImageModal(filename) {
+            sfx.playClick();
+            document.getElementById('image-modal').classList.remove('hidden');
+            document.getElementById('image-modal').classList.add('flex');
+        }
+
+        function closeImageModal() {
+            document.getElementById('image-modal').classList.add('hidden');
+            document.getElementById('image-modal').classList.remove('flex');
+        }
+    </script>
+</body>
+</html>

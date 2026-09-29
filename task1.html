@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конструктор и Тренажер Промптов | RTF & CARE Frameworks</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for preview */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        /* Custom UI focus animations */
+        .input-field {
+            transition: all 0.2s ease-in-out;
+        }
+        .input-field:focus-within {
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 font-sans min-h-screen transition-colors duration-200">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                        Prompt Crafter Pro
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Конструктор и Тренажер Промптов (RTF & CARE)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Preset Dropdown -->
+                <div class="relative">
+                    <select id="presetSelect" class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-medium rounded-lg px-3.5 py-2 pr-8 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer transition-all">
+                        <option value="" disabled selected>✨ Выберите готовый пресет...</option>
+                        <option value="code">💻 Написание кода / Рефакторинг</option>
+                        <option value="smm">📱 Маркетинговый пост / SMM</option>
+                        <option value="essay">📝 Аналитическая статья / Эссе</option>
+                        <option value="email">✉️ Деловое письмо / Email</option>
+                        <option value="brainstorm">💡 Мозговой штурм / Идеи</option>
+                    </select>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button id="themeToggle" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-all" title="Сменить тему">
+                    <!-- Sun Icon -->
+                    <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+                    </svg>
+                    <!-- Moon Icon -->
+                    <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto p-4 lg:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT COLUMN: Form Inputs -->
+        <section class="lg:col-span-6 xl:col-span-6 space-y-5">
+            
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-5 shadow-sm space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700/50">
+                    <h2 class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                        <span>🛠️ Параметры промпта</span>
+                    </h2>
+                    <button id="resetBtn" class="text-xs font-semibold text-slate-400 hover:text-red-500 transition-colors flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        Очистить
+                    </button>
+                </div>
+
+                <form id="promptForm" class="space-y-4" onsubmit="event.preventDefault();">
+                    <!-- Role (Role / CARE) -->
+                    <div class="input-field space-y-1.5">
+                        <label for="roleInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                            <span>🎭 Роль (Role)</span>
+                            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">RTF / CARE</span>
+                        </label>
+                        <input type="text" id="roleInput" placeholder="Напр.: Senior Frontend Developer с 10-летним опытом" 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 transition-all">
+                    </div>
+
+                    <!-- Task (Task / Action) -->
+                    <div class="input-field space-y-1.5">
+                        <label for="taskInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                            <span>🎯 Задача / Действие (Task / Action) *</span>
+                            <span class="text-[10px] text-red-500 font-bold bg-red-50 dark:bg-red-900/30 px-2 py-0.5 rounded">Обязательно</span>
+                        </label>
+                        <textarea id="taskInput" rows="3" placeholder="Напр.: Напиши функцию фильтрации массива объектов на TypeScript и проведи рефакторинг..." 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 transition-all resize-none"></textarea>
+                    </div>
+
+                    <!-- Context (Context) -->
+                    <div class="input-field space-y-1.5">
+                        <label for="contextInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                            <span>📌 Контекст / Аудитория (Context)</span>
+                            <span class="text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">CARE</span>
+                        </label>
+                        <textarea id="contextInput" rows="2" placeholder="Напр.: Для начинающих разработчиков, код будет использоваться в коммерческом production-проекте..." 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 transition-all resize-none"></textarea>
+                    </div>
+
+                    <!-- Format (Format / Result) -->
+                    <div class="input-field space-y-1.5">
+                        <label for="formatSelect" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                            <span>📐 Формат ответа (Format / Result)</span>
+                            <span class="text-[10px] text-blue-500 font-bold bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded">RTF</span>
+                        </label>
+                        <select id="formatSelect" 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 transition-all cursor-pointer">
+                            <option value="">Без явного формата</option>
+                            <option value="code">Блок кода с подробными комментариями</option>
+                            <option value="markdown">Маркдаун список (Bullet points)</option>
+                            <option value="table">Сравнительная таблица (Markdown Table)</option>
+                            <option value="json">Structured JSON schema</option>
+                            <option value="step-by-step">Пошаговое руководство (Step-by-step)</option>
+                            <option value="text">Простой понятный текст</option>
+                        </select>
+                    </div>
+
+                    <!-- Constraints / Negative Prompt -->
+                    <div class="input-field space-y-1.5">
+                        <label for="constraintsInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                            <span>🚫 Ограничения / Негативный промпт</span>
+                        </label>
+                        <input type="text" id="constraintsInput" placeholder="Напр.: Без вводных фраз ('Конечно, я помогу'), без сложных терминов, не дольше 300 слов" 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 transition-all">
+                    </div>
+
+                    <!-- Example / Few-Shot -->
+                    <div class="input-field space-y-1.5">
+                        <label for="exampleInput" class="block text-xs font-semibold text-slate-600 dark:text-slate-300 uppercase tracking-wider flex items-center justify-between">
+                            <span>💡 Пример желаемого ответа (Example / Few-Shot)</span>
+                            <span class="text-[10px] text-emerald-500 font-bold bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded">CARE</span>
+                        </label>
+                        <textarea id="exampleInput" rows="2" placeholder="Напр.: Пример вывода: { status: 'success', data: [...] }" 
+                            class="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:text-slate-100 transition-all resize-none"></textarea>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: Live Output & Analysis -->
+        <section class="lg:col-span-6 xl:col-span-6 space-y-5 flex flex-col justify-between">
+            
+            <div class="space-y-5">
+                <!-- Quality Score Indicator Box -->
+                <div class="bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl p-5 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-2">
+                            <span>⚡ Сила промпта:</span>
+                            <span id="scoreText" class="text-lg font-black text-slate-400">0%</span>
+                        </span>
+                        <span id="scoreBadge" class="text-xs px-2.5 py-1 rounded-full font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500">
+                            Пусто
+                        </span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-3 rounded-full overflow-hidden p-0.5">
+                        <div id="progressBar" class="h-full bg-slate-300 dark:bg-slate-600 rounded-full transition-all duration-500 ease-out w-0"></div>
+                    </div>
+
+                    <!-- Dynamic Smart Suggestions -->
+                    <div id="suggestionsBox" class="mt-3 pt-3 border-t border-slate-100 dark:border-slate-700/50 space-y-2">
+                        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">💡 Рекомендации по улучшению:</p>
+                        <ul id="suggestionsList" class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                            <!-- Populated dynamically via JavaScript -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Live Output Window (Terminal visual style) -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex flex-col">
+                    <!-- Terminal Header -->
+                    <div class="bg-slate-800/90 px-4 py-3 flex items-center justify-between border-b border-slate-700/50">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-yellow-500/80 inline-block"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/80 inline-block"></span>
+                            <span class="ml-2 text-xs font-mono text-slate-400">prompt_result.txt</span>
+                        </div>
+                        <button id="copyBtn" class="bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-all shadow-md shadow-blue-600/30">
+                            <svg id="copyIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 012-2v-8a2 2 0 01-2-2h-8a2 2 0 01-2 2v8a2 2 0 012 2z"/>
+                            </svg>
+                            <span id="copyBtnText">Скопировать</span>
+                        </button>
+                    </div>
+
+                    <!-- Terminal Content Body -->
+                    <div class="p-4 relative min-h-[260px] max-h-[420px] overflow-y-auto font-mono text-sm leading-relaxed text-slate-200">
+                        <pre id="promptOutput" class="whitespace-pre-wrap break-words font-mono"></pre>
+                        
+                        <!-- Empty Placeholder -->
+                        <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-500 pointer-events-none">
+                            <svg class="w-12 h-12 mb-3 stroke-slate-700" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                            <p class="text-sm font-medium">Заполните форму слева или выберите готовый пресет</p>
+                            <p class="text-xs text-slate-600 mt-1">Итоговый промпт сформируется автоматически</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toast Notification -->
+            <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-2xl border border-slate-700 flex items-center gap-2 transform translate-y-20 opacity-0 transition-all duration-300 z-50">
+                <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>Промпт скопирован в буфер обмена!</span>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- PRESETS DATA ---
+        const PRESETS = {
+            code: {
+                role: 'Senior Frontend Developer и Архитектор ПО',
+                task: 'Напиши чистый, оптимизированный и масштабируемый код компонента на React / Tailwind CSS.',
+                context: 'Компонент предназначается для дашборда аналитики с высокими требованиями к производительности и адаптивности.',
+                format: 'code',
+                constraints: 'Не используй устаревшие библиотеки, избегай проп-дриллинга, добавь комментарии JSDoc к ключевым функциям.',
+                example: '```jsx\n// Пример ожидаемой структуры:\nexport const AnalyticsCard = ({ title, value }) => (\n  <div class="p-4 bg-white rounded-xl">...</div>\n);\n```'
+            },
+            smm: {
+                role: 'Опытный SMM-стратег и Копирайтер',
+                task: 'Создай цепляющий, вовлекающий пост для Telegram-канала про искусственный интеллект.',
+                context: 'Целевая аудитория — IT-специалисты, продакт-менеджеры и диджитал-предприниматели.',
+                format: 'markdown',
+                constraints: 'Без банальных клише, без чрезмерного количества эмодзи (максимум 4-5 на весь пост), не более 1000 символов.',
+                example: '🚀 Заголовок-крючок\n\nОсновной тезис с практической пользой...\n\n👉 Призыв к действию'
+            },
+            essay: {
+                role: 'Профессиональный аналитик и Академический редактор',
+                task: 'Проведи глубокий анализ применения ИИ в образовательном процессе.',
+                context: 'Материал подготавливается для публикации в научно-популярном IT-журнале.',
+                format: 'step-by-step',
+                constraints: 'Соблюдай нейтральный экспертный тон, опирайся на факты, структурируй аргументы по тезисам.',
+                example: '1. Введение и проблематика\n2. Ключевые технологические тренды\n3. Анализ рисков и возможностей'
+            },
+            email: {
+                role: 'Business Communication Expert / B2B Sales Manager',
+                task: 'Составь убедительное холодное коммерческое письмо для сотрудничества.',
+                context: 'Предложение отправляется CTO крупной IT-компании для внедрения наших услуг аутстаффинга.',
+                format: 'text',
+                constraints: 'Не более 150 слов, четкий Value Proposition в первом абзаце, конкретный Call to Action в конце.',
+                example: 'Тема: Оптимизация разработки [Имя компании]\n\nЗдравствуйте, [Имя]! ...'
+            },
+            brainstorm: {
+                role: 'Креативный Директор и Продакт-фасилитатор',
+                task: 'Сгенерируй 10 уникальных концепций для запуска микро-SaaS сервиса.',
+                context: 'Продукт ориентирован на фрилансеров, работающих с контентом и дизайном.',
+                format: 'table',
+                constraints: 'Без банальных идей (вроде "очередного трекера задач"), оценивай каждую идею по сложности и потенциалу.',
+                example: '| Концепция | Проблема | Сложность (1-5) |\n| --- | --- | --- |'
+            }
+        };
+
+        // --- DOM ELEMENTS ---
+        const roleInput = document.getElementById('roleInput');
+        const taskInput = document.getElementById('taskInput');
+        const contextInput = document.getElementById('contextInput');
+        const formatSelect = document.getElementById('formatSelect');
+        const constraintsInput = document.getElementById('constraintsInput');
+        const exampleInput = document.getElementById('exampleInput');
+
+        const promptOutput = document.getElementById('promptOutput');
+        const emptyState = document.getElementById('emptyState');
+        const presetSelect = document.getElementById('presetSelect');
+        const resetBtn = document.getElementById('resetBtn');
+
+        const scoreText = document.getElementById('scoreText');
+        const scoreBadge = document.getElementById('scoreBadge');
+        const progressBar = document.getElementById('progressBar');
+        const suggestionsList = document.getElementById('suggestionsList');
+
+        const copyBtn = document.getElementById('copyBtn');
+        const copyBtnText = document.getElementById('copyBtnText');
+        const toast = document.getElementById('toast');
+        const themeToggle = document.getElementById('themeToggle');
+        const sunIcon = document.getElementById('sunIcon');
+        const moonIcon = document.getElementById('moonIcon');
+
+        // --- BUILD PROMPT STRING ---
+        function buildPrompt() {
+            const role = roleInput.value.trim();
+            const task = taskInput.value.trim();
+            const context = contextInput.value.trim();
+            const format = formatSelect.value;
+            const constraints = constraintsInput.value.trim();
+            const example = exampleInput.value.trim();
+
+            let parts = [];
+
+            if (role) {
+                parts.push(`[РОЛЬ]\nТы — ${role}.`);
+            }
+
+            if (task) {
+                parts.push(`[ЗАДАЧА]\n${task}`);
+            }
+
+            if (context) {
+                parts.push(`[КОНТЕКСТ И АУДИТОРИЯ]\n${context}`);
+            }
+
+            if (format) {
+                const formatMap = {
+                    'code': 'Предоставь ответ в виде чистый блока кода с подробными комментариями.',
+                    'markdown': 'Оформи ответ в виде структурированного Маркдаун списка (Bullet points).',
+                    'table': 'Представь данные в виде наглядной Markdown таблицы.',
+                    'json': 'Верни строго валидный Structured JSON формат без постороннего текста.',
+                    'step-by-step': 'Распиши ответ пошагово (Step-by-step руководство).',
+                    'text': 'Ответь простым, понятным и лаконичным текстом.'
+                };
+                parts.push(`[ФОРМАТ ОТВЕТА]\n${formatMap[format] || format}`);
+            }
+
+            if (constraints) {
+                parts.push(`[ОГРАНИЧЕНИЯ И НЕГАТИВНЫЙ ПРОМПТ]\n${constraints}`);
+            }
+
+            if (example) {
+                parts.push(`[ПРИМЕР ЖЕЛАЕМОГО ОТВЕТА (FEW-SHOT)]\n${example}`);
+            }
+
+            const fullPrompt = parts.join('\n\n');
+
+            if (fullPrompt.length > 0) {
+                promptOutput.textContent = fullPrompt;
+                emptyState.classList.add('hidden');
+            } else {
+                promptOutput.textContent = '';
+                emptyState.classList.remove('hidden');
+            }
+
+            updateQualityScore();
+            return fullPrompt;
+        }
+
+        // --- SCORE & RECOMMENDATIONS LOGIC ---
+        function updateQualityScore() {
+            let score = 0;
+            let suggestions = [];
+
+            const role = roleInput.value.trim();
+            const task = taskInput.value.trim();
+            const context = contextInput.value.trim();
+            const format = formatSelect.value;
+            const constraints = constraintsInput.value.trim();
+            const example = exampleInput.value.trim();
+
+            // Weight Distribution: Task=30%, Role=20%, Context=20%, Format=15%, Constraints=15%
+            if (task) {
+                score += 30;
+            } else {
+                suggestions.push('🎯 <b>Добавь главную задачу</b> — это основа любого качественного промпта (+30%).');
+            }
+
+            if (role) {
+                score += 20;
+            } else {
+                suggestions.push('🎭 <b>Укажи роль ИИ</b> для получения более глубокой экспертной позиции (+20%).');
+            }
+
+            if (context) {
+                score += 20;
+            } else {
+                suggestions.push('📌 <b>Опиши контекст или аудиторию</b>, чтобы ИИ понимал цели и масштаб (+20%).');
+            }
+
+            if (format) {
+                score += 15;
+            } else {
+                suggestions.push('📐 <b>Выбери формат ответа</b> (таблица, код, маркдаун) для четкой структуры (+15%).');
+            }
+
+            if (constraints) {
+                score += 15;
+            } else {
+                suggestions.push('🚫 <b>Задай ограничения</b>, чтобы избежать клише и лишней "воды" (+15%).');
+            }
+
+            if (!example) {
+                suggestions.push('💡 <i>Совет:</i> Добавление примера (Few-Shot) существенно повышает точность ответа.');
+            }
+
+            // Update UI Score Elements
+            scoreText.textContent = `${score}%`;
+            progressBar.style.width = `${score}%`;
+
+            // Style Bar & Badge by Score Level
+            if (score === 0) {
+                progressBar.className = 'h-full bg-slate-300 dark:bg-slate-600 rounded-full transition-all duration-500 w-0';
+                scoreBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-slate-100 dark:bg-slate-700 text-slate-500';
+                scoreBadge.textContent = 'Пусто';
+            } else if (score < 50) {
+                progressBar.className = 'h-full bg-red-500 rounded-full transition-all duration-500';
+                scoreBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400';
+                scoreBadge.textContent = 'Слабый';
+            } else if (score < 80) {
+                progressBar.className = 'h-full bg-amber-500 rounded-full transition-all duration-500';
+                scoreBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400';
+                scoreBadge.textContent = 'Хороший';
+            } else {
+                progressBar.className = 'h-full bg-emerald-500 rounded-full transition-all duration-500';
+                scoreBadge.className = 'text-xs px-2.5 py-1 rounded-full font-semibold bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400';
+                scoreBadge.textContent = 'Мощный! 🚀';
+            }
+
+            // Render Suggestions
+            if (suggestions.length === 0) {
+                suggestionsList.innerHTML = '<li class="text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">✨ Идеальный промпт! Все ключевые компоненты учтены.</li>';
+            } else {
+                suggestionsList.innerHTML = suggestions.map(s => `<li class="flex items-start gap-1.5"><span>•</span><span>${s}</span></li>`).join('');
+            }
+        }
+
+        // --- EVENT HANDLERS ---
+        const inputs = [roleInput, taskInput, contextInput, formatSelect, constraintsInput, exampleInput];
+        inputs.forEach(input => {
+            input.addEventListener('input', buildPrompt);
+            input.addEventListener('change', buildPrompt);
+        });
+
+        // Preset Selection
+        presetSelect.addEventListener('change', (e) => {
+            const key = e.target.value;
+            if (PRESETS[key]) {
+                const data = PRESETS[key];
+                roleInput.value = data.role;
+                taskInput.value = data.task;
+                contextInput.value = data.context;
+                formatSelect.value = data.format;
+                constraintsInput.value = data.constraints;
+                exampleInput.value = data.example;
+                buildPrompt();
+            }
+        });
+
+        // Reset Form
+        resetBtn.addEventListener('click', () => {
+            inputs.forEach(input => input.value = '');
+            presetSelect.value = '';
+            buildPrompt();
+        });
+
+        // Copy to Clipboard
+        copyBtn.addEventListener('click', () => {
+            const textToCopy = promptOutput.textContent;
+            if (!textToCopy) return;
+
+            // Execution of copy fallback compatible with iFrame environments
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                showToast();
+            } catch (err) {
+                console.error('Ошибка копирования:', err);
+            }
+            document.body.removeChild(textArea);
+        });
+
+        function showToast() {
+            copyBtnText.textContent = 'Скопировано!';
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                copyBtnText.textContent = 'Скопировать';
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // --- DARK MODE TOGGLE ---
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            sunIcon.classList.toggle('hidden', !isDark);
+            moonIcon.classList.toggle('hidden', isDark);
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        });
+
+        // Init theme state
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+        } else {
+            document.documentElement.classList.remove('dark');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+        }
+
+        // Initialize empty prompt
+        buildPrompt();
+    </script>
+</body>
+</html>

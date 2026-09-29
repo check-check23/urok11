@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заметки и Сезоны</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #2e1065 0%, #3b0764 35%, #581c87 70%, #701a75 100%);
+            min-height: 100vh;
+            color: #f3e8ff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Canvas background overlay */
+        #season-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.07);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: rgba(236, 72, 153, 0.4);
+            box-shadow: 0 20px 30px rgba(112, 26, 117, 0.3);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .glass-input::placeholder {
+            color: rgba(243, 232, 255, 0.5);
+        }
+
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #d8b4fe;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(216, 180, 254, 0.25);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 10, 60, 0.3);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(216, 180, 254, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(216, 180, 254, 0.6);
+        }
+
+        /* Animated Highlight for search term */
+        mark.highlight {
+            background: rgba(244, 114, 182, 0.4);
+            color: #ffffff;
+            padding: 0.1em 0.3em;
+            border-radius: 0.2em;
+        }
+        
+        /* Modal Backdrop */
+        .modal-backdrop {
+            background: rgba(15, 3, 25, 0.7);
+            backdrop-filter: blur(8px);
+        }
+
+        /* Badge themes for notes */
+        .badge-purple { background: rgba(168, 85, 247, 0.25); border: 1px solid rgba(168, 85, 247, 0.4); color: #f3e8ff; }
+        .badge-pink { background: rgba(236, 72, 153, 0.25); border: 1px solid rgba(236, 72, 153, 0.4); color: #fce7f3; }
+        .badge-indigo { background: rgba(99, 102, 241, 0.25); border: 1px solid rgba(99, 102, 241, 0.4); color: #e0e7ff; }
+        .badge-rose { background: rgba(244, 63, 94, 0.25); border: 1px solid rgba(244, 63, 94, 0.4); color: #ffe4e6; }
+    </style>
+</head>
+<body class="relative z-0 min-h-screen pb-12">
+
+    <!-- Background Canvas for Animations -->
+    <canvas id="season-canvas"></canvas>
+
+    <!-- App Container -->
+    <div class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+        <!-- Header -->
+        <header class="flex items-center justify-between gap-4 mb-8">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-tr from-fuchsia-600 to-pink-500 flex items-center justify-center shadow-lg shadow-pink-500/30">
+                    <i class="fa-solid fa-book-bookmark text-2xl text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-pink-200 via-purple-200 to-indigo-100">
+                        Мои Заметки
+                    </h1>
+                    <p class="text-xs sm:text-sm text-purple-200/70 font-medium">Создавайте, ищите и храните идеи с уютом</p>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <button id="btn-add-note" class="py-3 px-4 sm:px-5 rounded-2xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-purple-900/40 hover:shadow-pink-500/25 transition-all transform active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-plus text-lg"></i>
+                    <span class="hidden sm:inline">Новая заметка</span>
+                </button>
+
+                <button id="btn-open-settings" class="w-12 h-12 rounded-2xl glass-panel hover:bg-white/20 flex items-center justify-center text-purple-200 hover:text-white transition transform active:scale-95 shadow-md">
+                    <i class="fa-solid fa-gear text-xl animate-spin-slow"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search and Filter Bar -->
+        <section class="glass-panel rounded-3xl p-4 sm:p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <!-- Search Input -->
+            <div class="relative w-full md:w-1/2">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-purple-300/60 text-lg"></i>
+                <input type="text" id="input-search" placeholder="Поиск по заголовку или тексту..." class="glass-input w-full pl-12 pr-10 py-3.5 rounded-2xl font-medium text-sm sm:text-base">
+                <button id="btn-clear-search" class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-purple-300/60 hover:text-white">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-filter text-purple-300/70 text-xs"></i>
+                    <select id="select-date-filter" class="glass-input px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer border-none focus:ring-0">
+                        <option value="all" class="bg-purple-950 text-white">Все даты</option>
+                        <option value="today" class="bg-purple-950 text-white">За сегодня</option>
+                        <option value="week" class="bg-purple-950 text-white">За эту неделю</option>
+                        <option value="month" class="bg-purple-950 text-white">За этот месяц</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-down-wide-short text-purple-300/70 text-xs"></i>
+                    <select id="select-sort" class="glass-input px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold cursor-pointer border-none focus:ring-0">
+                        <option value="newest" class="bg-purple-950 text-white">Сначала новые</option>
+                        <option value="oldest" class="bg-purple-950 text-white">Сначала старые</option>
+                        <option value="title" class="bg-purple-950 text-white">По алфавиту</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Active Filter Badge & Counter -->
+        <div class="flex items-center justify-between mb-4 px-2">
+            <span id="notes-counter" class="text-xs sm:text-sm font-medium text-purple-200/70">
+                Загрузка заметок...
+            </span>
+            <span id="season-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-pink-500/20 text-pink-200 border border-pink-500/30 flex items-center gap-2">
+                <i id="season-icon" class="fa-solid fa-snowflake"></i>
+                <span id="season-name">Зима</span>
+            </span>
+        </div>
+
+        <!-- Notes Grid -->
+        <main id="notes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Note Cards inserted here -->
+        </main>
+
+        <!-- Empty State Container -->
+        <div id="empty-state" class="hidden glass-panel rounded-3xl p-12 text-center max-w-md mx-auto my-12 flex flex-col items-center">
+            <div class="w-20 h-20 rounded-full bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-4xl text-purple-300 mb-4">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2">Заметок не найдено</h3>
+            <p class="text-sm text-purple-200/70 mb-6">Создайте свою первую заметку или измените параметры поиска.</p>
+            <button id="btn-empty-create" class="py-2.5 px-5 rounded-xl bg-pink-500 hover:bg-pink-400 text-white font-semibold text-sm transition">
+                Создать заметку
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Create / Edit Note -->
+    <div id="modal-note" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50 transition-opacity duration-300">
+        <div class="glass-panel bg-slate-950/80 rounded-3xl max-w-2xl w-full p-6 sm:p-8 flex flex-col gap-5 border border-purple-400/30 shadow-2xl relative animate-scale-up">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                <h3 id="modal-note-title" class="text-xl font-bold flex items-center gap-2 text-pink-200">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Новая заметка</span>
+                </h3>
+                <button id="btn-close-note-modal" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-purple-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Form -->
+            <form id="form-note" class="flex flex-col gap-4">
+                <input type="hidden" id="note-id">
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-purple-200/80 mb-2">Заголовок</label>
+                    <input type="text" id="note-title-input" required placeholder="Введите заголовок..." class="glass-input w-full px-4 py-3 rounded-xl font-bold text-lg">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-purple-200/80 mb-2">Категория / Тег</label>
+                        <input type="text" id="note-tag-input" placeholder="например: Работа, Идея, Учеба" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-purple-200/80 mb-2">Цветовая метка</label>
+                        <select id="note-color-input" class="glass-input w-full px-4 py-2.5 rounded-xl text-sm cursor-pointer">
+                            <option value="purple" class="bg-purple-950 text-purple-200">Фиолетовый</option>
+                            <option value="pink" class="bg-purple-950 text-pink-200">Розовый</option>
+                            <option value="indigo" class="bg-purple-950 text-indigo-200">Индиго</option>
+                            <option value="rose" class="bg-purple-950 text-rose-200">Алый</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-purple-200/80 mb-2">Текст заметки</label>
+                    <textarea id="note-content-input" rows="6" required placeholder="Напишите здесь что-нибудь важное..." class="glass-input w-full p-4 rounded-xl text-sm leading-relaxed resize-none"></textarea>
+                </div>
+
+                <div class="flex items-center justify-end gap-3 mt-2 pt-4 border-t border-white/10">
+                    <button type="button" id="btn-cancel-note" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 font-semibold text-sm transition">
+                        Отмена
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 font-bold text-sm shadow-lg transition">
+                        Сохранить
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Settings (Season Picker) -->
+    <div id="modal-settings" class="fixed inset-0 modal-backdrop hidden items-center justify-center p-4 z-50 transition-opacity duration-300">
+        <div class="glass-panel bg-slate-950/85 rounded-3xl max-w-md w-full p-6 sm:p-8 flex flex-col gap-6 border border-purple-400/30 shadow-2xl relative">
+            <div class="flex items-center justify-between border-b border-white/10 pb-4">
+                <h3 class="text-xl font-bold flex items-center gap-2 text-purple-200">
+                    <i class="fa-solid fa-sliders text-pink-400"></i>
+                    <span>Настройки темы</span>
+                </h3>
+                <button id="btn-close-settings-modal" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center text-purple-200 hover:text-white transition">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <label class="block text-xs font-bold uppercase tracking-wider text-purple-200/80">Пора года (Сезонная анимация)</label>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <!-- Winter -->
+                    <button data-season="winter" class="season-opt-btn p-4 rounded-2xl glass-card flex flex-col items-center gap-2 hover:border-pink-400/50 transition text-center">
+                        <i class="fa-solid fa-snowflake text-2xl text-cyan-300"></i>
+                        <span class="font-bold text-sm">Зима</span>
+                        <span class="text-[10px] text-purple-300/60">Снежный пад</span>
+                    </button>
+
+                    <!-- Spring -->
+                    <button data-season="spring" class="season-opt-btn p-4 rounded-2xl glass-card flex flex-col items-center gap-2 hover:border-pink-400/50 transition text-center">
+                        <i class="fa-solid fa-spa text-2xl text-pink-300"></i>
+                        <span class="font-bold text-sm">Весна</span>
+                        <span class="text-[10px] text-purple-300/60">Лепестки Сакуры</span>
+                    </button>
+
+                    <!-- Summer -->
+                    <button data-season="summer" class="season-opt-btn p-4 rounded-2xl glass-card flex flex-col items-center gap-2 hover:border-pink-400/50 transition text-center">
+                        <i class="fa-solid fa-sun text-2xl text-amber-300"></i>
+                        <span class="font-bold text-sm">Лето</span>
+                        <span class="text-[10px] text-purple-300/60">Солнце & Бабочки</span>
+                    </button>
+
+                    <!-- Autumn -->
+                    <button data-season="autumn" class="season-opt-btn p-4 rounded-2xl glass-card flex flex-col items-center gap-2 hover:border-pink-400/50 transition text-center">
+                        <i class="fa-solid fa-leaf text-2xl text-orange-400"></i>
+                        <span class="font-bold text-sm">Осень</span>
+                        <span class="text-[10px] text-purple-300/60">Листопад & Дождь</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button id="btn-save-settings" class="w-full py-3 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 font-bold text-sm shadow-lg transition">
+                    Применить
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // ==========================================
+            // 1. STATE & STORAGE MANAGEMENT
+            // ==========================================
+            const STORAGE_NOTES_KEY = 'purple_notes_app_data_v1';
+            const STORAGE_SEASON_KEY = 'purple_notes_app_season';
+
+            let notes = [];
+            let currentSeason = localStorage.getItem(STORAGE_SEASON_KEY) || 'winter';
+            let searchQuery = '';
+            let dateFilter = 'all';
+            let sortBy = 'newest';
+
+            // Sample initial notes if storage is empty
+            const sampleNotes = [
+                {
+                    id: '1',
+                    title: 'Добро пожаловать в Заметки!',
+                    content: 'Это удобное приложение для хранения мыслей и списков задач. Попробуйте найти эту заметку через строку поиска или поменяйте сезон в настройках (шестеренка вверху).',
+                    tag: 'Инструкция',
+                    color: 'pink',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    title: 'Список покупок к празднику',
+                    content: '1. Свежие ягоды\n2. Цветочный чай\n3. Торт с черникой\n4. Уютные свечи для дома',
+                    tag: 'Покупки',
+                    color: 'purple',
+                    createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
+                    updatedAt: new Date(Date.now() - 86400000 * 2).toISOString()
+                }
+            ];
+
+            function loadNotes() {
+                const data = localStorage.getItem(STORAGE_NOTES_KEY);
+                if (data) {
+                    try {
+                        notes = JSON.parse(data);
+                    } catch (e) {
+                        notes = sampleNotes;
+                    }
+                } else {
+                    notes = sampleNotes;
+                    saveNotes();
+                }
+            }
+
+            function saveNotes() {
+                localStorage.setItem(STORAGE_NOTES_KEY, JSON.stringify(notes));
+            }
+
+            function saveSeason(season) {
+                currentSeason = season;
+                localStorage.setItem(STORAGE_SEASON_KEY, season);
+                updateSeasonBadgeUI();
+                initSeasonAnimation(season);
+            }
+
+            // ==========================================
+            // 2. DOM ELEMENTS
+            // ==========================================
+            const notesGrid = document.getElementById('notes-grid');
+            const emptyState = document.getElementById('empty-state');
+            const notesCounter = document.getElementById('notes-counter');
+            const inputSearch = document.getElementById('input-search');
+            const btnClearSearch = document.getElementById('btn-clear-search');
+            const selectDateFilter = document.getElementById('select-date-filter');
+            const selectSort = document.getElementById('select-sort');
+
+            // Modals
+            const modalNote = document.getElementById('modal-note');
+            const formNote = document.getElementById('form-note');
+            const modalNoteTitle = document.getElementById('modal-note-title');
+            const noteIdInput = document.getElementById('note-id');
+            const noteTitleInput = document.getElementById('note-title-input');
+            const noteTagInput = document.getElementById('note-tag-input');
+            const noteColorInput = document.getElementById('note-color-input');
+            const noteContentInput = document.getElementById('note-content-input');
+            const btnAddNote = document.getElementById('btn-add-note');
+            const btnCloseNoteModal = document.getElementById('btn-close-note-modal');
+            const btnCancelNote = document.getElementById('btn-cancel-note');
+            const btnEmptyCreate = document.getElementById('btn-empty-create');
+
+            // Settings Modal
+            const modalSettings = document.getElementById('modal-settings');
+            const btnOpenSettings = document.getElementById('btn-open-settings');
+            const btnCloseSettingsModal = document.getElementById('btn-close-settings-modal');
+            const btnSaveSettings = document.getElementById('btn-save-settings');
+            const seasonBadge = document.getElementById('season-badge');
+            const seasonIcon = document.getElementById('season-icon');
+            const seasonName = document.getElementById('season-name');
+
+            // ==========================================
+            // 3. UI RENDERING & FILTERING
+            // ==========================================
+            function formatDate(isoString) {
+                const date = new Date(isoString);
+                return date.toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+
+            function highlightText(text, query) {
+                if (!query) return escapeHtml(text);
+                const escapedText = escapeHtml(text);
+                const reg = new RegExp(`(${escapeRegExp(query)})`, 'gi');
+                return escapedText.replace(reg, '<mark class="highlight">$1</mark>');
+            }
+
+            function escapeHtml(str) {
+                return str.replace(/[&<>"']/g, function(m) {
+                    return {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    }[m];
+                });
+            }
+
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function filterAndSortNotes() {
+                let filtered = notes.filter(note => {
+                    // Text Search
+                    const matchQuery = !searchQuery || 
+                        note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        note.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        (note.tag && note.tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
+                    if (!matchQuery) return false;
+
+                    // Date Filter
+                    const noteDate = new Date(note.createdAt);
+                    const now = new Date();
+
+                    if (dateFilter === 'today') {
+                        return noteDate.toDateString() === now.toDateString();
+                    } else if (dateFilter === 'week') {
+                        const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                        return noteDate >= weekAgo;
+                    } else if (dateFilter === 'month') {
+                        const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                        return noteDate >= monthAgo;
+                    }
+
+                    return true;
+                });
+
+                // Sorting
+                filtered.sort((a, b) => {
+                    if (sortBy === 'newest') {
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    } else if (sortBy === 'oldest') {
+                        return new Date(a.createdAt) - new Date(b.createdAt);
+                    } else if (sortBy === 'title') {
+                        return a.title.localeCompare(b.title);
+                    }
+                    return 0;
+                });
+
+                return filtered;
+            }
+
+            function renderNotes() {
+                const filteredNotes = filterAndSortNotes();
+
+                // Counter text
+                notesCounter.textContent = `Показано заметок: ${filteredNotes.length} из ${notes.length}`;
+
+                if (filteredNotes.length === 0) {
+                    notesGrid.innerHTML = '';
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                
+                notesGrid.innerHTML = filteredNotes.map(note => {
+                    const badgeClass = `badge-${note.color || 'purple'}`;
+                    const formattedDate = formatDate(note.createdAt);
+                    const titleHtml = highlightText(note.title, searchQuery);
+                    const contentHtml = highlightText(note.content, searchQuery);
+
+                    return `
+                        <article class="glass-card rounded-3xl p-6 flex flex-col justify-between relative group">
+                            <div>
+                                <!-- Header info -->
+                                <div class="flex items-center justify-between gap-2 mb-3">
+                                    <span class="px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase ${badgeClass}">
+                                        ${escapeHtml(note.tag || 'Общее')}
+                                    </span>
+                                    <span class="text-[11px] text-purple-200/50 font-medium">
+                                        ${formattedDate}
+                                    </span>
+                                </div>
+
+                                <!-- Title -->
+                                <h3 class="text-lg font-bold text-white mb-2 line-clamp-2 leading-snug">
+                                    ${titleHtml}
+                                </h3>
+
+                                <!-- Content snippet -->
+                                <p class="text-sm text-purple-100/80 leading-relaxed whitespace-pre-line line-clamp-4 mb-4">
+                                    ${contentHtml}
+                                </p>
+                            </div>
+
+                            <!-- Footer Actions -->
+                            <div class="flex items-center justify-end gap-2 pt-3 border-t border-white/10 opacity-90 sm:opacity-75 group-hover:opacity-100 transition-opacity">
+                                <button onclick="window.editNote('${note.id}')" title="Редактировать" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-pink-500/30 text-purple-200 hover:text-white flex items-center justify-center transition">
+                                    <i class="fa-solid fa-pen text-xs"></i>
+                                </button>
+                                <button onclick="window.deleteNote('${note.id}')" title="Удалить" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-rose-500/40 text-purple-200 hover:text-rose-200 flex items-center justify-center transition">
+                                    <i class="fa-solid fa-trash text-xs"></i>
+                                </button>
+                            </div>
+                        </article>
+                    `;
+                }).join('');
+            }
+
+            // ==========================================
+            // 4. NOTE MODAL ACTIONS
+            // ==========================================
+            function openNoteModal(isEdit = false, noteData = null) {
+                if (isEdit && noteData) {
+                    modalNoteTitle.querySelector('span').textContent = 'Редактировать заметку';
+                    noteIdInput.value = noteData.id;
+                    noteTitleInput.value = noteData.title;
+                    noteTagInput.value = noteData.tag || '';
+                    noteColorInput.value = noteData.color || 'purple';
+                    noteContentInput.value = noteData.content;
+                } else {
+                    modalNoteTitle.querySelector('span').textContent = 'Новая заметка';
+                    formNote.reset();
+                    noteIdInput.value = '';
+                }
+
+                modalNote.classList.remove('hidden');
+                modalNote.classList.add('flex');
+                noteTitleInput.focus();
+            }
+
+            function closeNoteModal() {
+                modalNote.classList.add('hidden');
+                modalNote.classList.remove('flex');
+                formNote.reset();
+            }
+
+            formNote.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const id = noteIdInput.value;
+                const title = noteTitleInput.value.trim();
+                const tag = noteTagInput.value.trim() || 'Заметка';
+                const color = noteColorInput.value;
+                const content = noteContentInput.value.trim();
+
+                if (!title || !content) return;
+
+                if (id) {
+                    // Update
+                    const index = notes.findIndex(n => n.id === id);
+                    if (index !== -1) {
+                        notes[index] = {
+                            ...notes[index],
+                            title,
+                            tag,
+                            color,
+                            content,
+                            updatedAt: new Date().toISOString()
+                        };
+                    }
+                } else {
+                    // Create
+                    const newNote = {
+                        id: Date.now().toString(),
+                        title,
+                        tag,
+                        color,
+                        content,
+                        createdAt: new Date().toISOString(),
+                        updatedAt: new Date().toISOString()
+                    };
+                    notes.unshift(newNote);
+                }
+
+                saveNotes();
+                renderNotes();
+                closeNoteModal();
+            });
+
+            // Global Actions for buttons inside HTML
+            window.editNote = function(id) {
+                const note = notes.find(n => n.id === id);
+                if (note) openNoteModal(true, note);
+            };
+
+            window.deleteNote = function(id) {
+                if (confirm('Вы уверены, что хотите удалить эту заметку?')) {
+                    notes = notes.filter(n => n.id !== id);
+                    saveNotes();
+                    renderNotes();
+                }
+            };
+
+            // Event Listeners for UI Controls
+            btnAddNote.addEventListener('click', () => openNoteModal(false));
+            btnEmptyCreate.addEventListener('click', () => openNoteModal(false));
+            btnCloseNoteModal.addEventListener('click', closeNoteModal);
+            btnCancelNote.addEventListener('click', closeNoteModal);
+
+            inputSearch.addEventListener('input', (e) => {
+                searchQuery = e.target.value.trim();
+                btnClearSearch.classList.toggle('hidden', !searchQuery);
+                renderNotes();
+            });
+
+            btnClearSearch.addEventListener('click', () => {
+                inputSearch.value = '';
+                searchQuery = '';
+                btnClearSearch.classList.add('hidden');
+                renderNotes();
+            });
+
+            selectDateFilter.addEventListener('change', (e) => {
+                dateFilter = e.target.value;
+                renderNotes();
+            });
+
+            selectSort.addEventListener('change', (e) => {
+                sortBy = e.target.value;
+                renderNotes();
+            });
+
+            // ==========================================
+            // 5. SEASON SETTINGS MODAL
+            // ==========================================
+            function updateSeasonBadgeUI() {
+                const seasonMeta = {
+                    winter: { name: 'Зима', icon: 'fa-snowflake', color: 'text-cyan-300' },
+                    spring: { name: 'Весна', icon: 'fa-spa', color: 'text-pink-300' },
+                    summer: { name: 'Лето', icon: 'fa-sun', color: 'text-amber-300' },
+                    autumn: { name: 'Осень', icon: 'fa-leaf', color: 'text-orange-400' }
+                };
+
+                const meta = seasonMeta[currentSeason] || seasonMeta.winter;
+                seasonName.textContent = meta.name;
+                seasonIcon.className = `fa-solid ${meta.icon} ${meta.color}`;
+
+                // Update active state in settings modal
+                document.querySelectorAll('.season-opt-btn').forEach(btn => {
+                    const isSelected = btn.dataset.season === currentSeason;
+                    btn.classList.toggle('border-pink-400', isSelected);
+                    btn.classList.toggle('bg-white/20', isSelected);
+                });
+            }
+
+            btnOpenSettings.addEventListener('click', () => {
+                updateSeasonBadgeUI();
+                modalSettings.classList.remove('hidden');
+                modalSettings.classList.add('flex');
+            });
+
+            btnCloseSettingsModal.addEventListener('click', () => {
+                modalSettings.classList.add('hidden');
+                modalSettings.classList.remove('flex');
+            });
+
+            let selectedTempSeason = currentSeason;
+            document.querySelectorAll('.season-opt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    selectedTempSeason = btn.dataset.season;
+                    document.querySelectorAll('.season-opt-btn').forEach(b => {
+                        b.classList.remove('border-pink-400', 'bg-white/20');
+                    });
+                    btn.classList.add('border-pink-400', 'bg-white/20');
+                });
+            });
+
+            btnSaveSettings.addEventListener('click', () => {
+                saveSeason(selectedTempSeason);
+                modalSettings.classList.add('hidden');
+                modalSettings.classList.remove('flex');
+            });
+
+            // ==========================================
+            // 6. CANVAS SEASONAL ANIMATION ENGINE
+            // ==========================================
+            const canvas = document.getElementById('season-canvas');
+            const ctx = canvas.getContext('2d');
+            let animationFrameId = null;
+            let particles = [];
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function initSeasonAnimation(season) {
+                if (animationFrameId) cancelAnimationFrame(animationFrameId);
+                particles = [];
+
+                const count = window.innerWidth < 640 ? 30 : 60;
+
+                for (let i = 0; i < count; i++) {
+                    particles.push(createParticle(season, true));
+                }
+
+                animateCanvas(season);
+            }
+
+            function createParticle(season, randomY = false) {
+                const w = canvas.width;
+                const h = canvas.height;
+                const yPos = randomY ? Math.random() * h : -20;
+
+                if (season === 'winter') {
+                    return {
+                        x: Math.random() * w,
+                        y: yPos,
+                        radius: Math.random() * 3 + 1,
+                        speedY: Math.random() * 1.5 + 0.5,
+                        speedX: Math.random() * 0.5 - 0.25,
+                        opacity: Math.random() * 0.7 + 0.3
+                    };
+                } else if (season === 'spring') {
+                    return {
+                        x: Math.random() * w,
+                        y: yPos,
+                        size: Math.random() * 8 + 6,
+                        speedY: Math.random() * 1.2 + 0.6,
+                        speedX: Math.random() * 1 - 0.2,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: Math.random() * 0.02 - 0.01,
+                        opacity: Math.random() * 0.7 + 0.3
+                    };
+                } else if (season === 'summer') {
+                    const isButterfly = Math.random() > 0.7;
+                    return {
+                        type: isButterfly ? 'butterfly' : 'sunbeam',
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        size: isButterfly ? Math.random() * 6 + 4 : Math.random() * 4 + 2,
+                        speedX: (Math.random() - 0.5) * 1.5,
+                        speedY: (Math.random() - 0.5) * 1.5,
+                        wingAngle: 0,
+                        opacity: Math.random() * 0.6 + 0.3
+                    };
+                } else if (season === 'autumn') {
+                    const isRain = Math.random() > 0.5;
+                    return {
+                        type: isRain ? 'rain' : 'leaf',
+                        x: Math.random() * w,
+                        y: yPos,
+                        size: Math.random() * 10 + 6,
+                        length: Math.random() * 15 + 10,
+                        speedY: isRain ? Math.random() * 6 + 4 : Math.random() * 1.5 + 0.8,
+                        speedX: isRain ? 0.5 : Math.random() * 1.5 - 0.5,
+                        rotation: Math.random() * Math.PI * 2,
+                        rotSpeed: Math.random() * 0.03 - 0.015,
+                        opacity: Math.random() * 0.6 + 0.3,
+                        color: ['#f97316', '#eab308', '#dc2626'][Math.floor(Math.random() * 3)]
+                    };
+                }
+            }
+
+            function animateCanvas(season) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach((p, idx) => {
+                    if (season === 'winter') {
+                        // Draw Snowflake
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${p.opacity})`;
+                        ctx.fill();
+
+                        p.y += p.speedY;
+                        p.x += p.speedX;
+
+                        if (p.y > canvas.height) particles[idx] = createParticle('winter');
+
+                    } else if (season === 'spring') {
+                        // Draw Sakura Petal
+                        ctx.save();
+                        ctx.translate(p.x, p.y);
+                        ctx.rotate(p.rotation);
+                        ctx.beginPath();
+                        ctx.ellipse(0, 0, p.size, p.size / 2, 0, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(244, 114, 182, ${p.opacity})`;
+                        ctx.fill();
+                        ctx.restore();
+
+                        p.y += p.speedY;
+                        p.x += Math.sin(p.y * 0.01) + p.speedX;
+                        p.rotation += p.rotSpeed;
+
+                        if (p.y > canvas.height) particles[idx] = createParticle('spring');
+
+                    } else if (season === 'summer') {
+                        if (p.type === 'butterfly') {
+                            // Draw Butterfly
+                            p.wingAngle += 0.15;
+                            const wingWidth = Math.sin(p.wingAngle) * p.size;
+
+                            ctx.save();
+                            ctx.translate(p.x, p.y);
+                            ctx.fillStyle = `rgba(251, 191, 36, ${p.opacity})`;
+                            // Wings
+                            ctx.beginPath();
+                            ctx.ellipse(-wingWidth/2, 0, Math.abs(wingWidth), p.size, 0, 0, Math.PI * 2);
+                            ctx.ellipse(wingWidth/2, 0, Math.abs(wingWidth), p.size, 0, 0, Math.PI * 2);
+                            ctx.fill();
+                            ctx.restore();
+
+                            p.x += p.speedX;
+                            p.y += p.speedY;
+
+                            if (p.x < 0 || p.x > canvas.width) p.speedX *= -1;
+                            if (p.y < 0 || p.y > canvas.height) p.speedY *= -1;
+                        } else {
+                            // Glowing Sun Flare
+                            ctx.beginPath();
+                            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                            ctx.fillStyle = `rgba(253, 224, 71, ${p.opacity * 0.5})`;
+                            ctx.fill();
+
+                            p.y -= 0.3;
+                            if (p.y < 0) p.y = canvas.height;
+                        }
+
+                    } else if (season === 'autumn') {
+                        if (p.type === 'rain') {
+                            // Draw Rain droplet
+                            ctx.beginPath();
+                            ctx.moveTo(p.x, p.y);
+                            ctx.lineTo(p.x + p.speedX, p.y + p.length);
+                            ctx.strokeStyle = `rgba(192, 132, 252, ${p.opacity * 0.4})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+
+                            p.y += p.speedY;
+                            p.x += p.speedX;
+
+                            if (p.y > canvas.height) particles[idx] = createParticle('autumn');
+                        } else {
+                            // Draw Autumn Leaf
+                            ctx.save();
+                            ctx.translate(p.x, p.y);
+                            ctx.rotate(p.rotation);
+                            ctx.fillStyle = p.color;
+                            ctx.globalAlpha = p.opacity;
+                            ctx.beginPath();
+                            ctx.moveTo(0, -p.size);
+                            ctx.quadraticCurveTo(p.size, 0, 0, p.size);
+                            ctx.quadraticCurveTo(-p.size, 0, 0, -p.size);
+                            ctx.fill();
+                            ctx.restore();
+
+                            p.y += p.speedY;
+                            p.x += Math.cos(p.y * 0.02) * 1.2;
+                            p.rotation += p.rotSpeed;
+
+                            if (p.y > canvas.height) particles[idx] = createParticle('autumn');
+                        }
+                    }
+                });
+
+                animationFrameId = requestAnimationFrame(() => animateCanvas(season));
+            }
+
+            // ==========================================
+            // 7. INITIAL STARTUP
+            // ==========================================
+            loadNotes();
+            renderNotes();
+            updateSeasonBadgeUI();
+            initSeasonAnimation(currentSeason);
+        });
+    </script>
+</body>
+</html>

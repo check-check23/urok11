@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Научная Викторина</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050714;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        .heading-font {
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        /* Starry background effect */
+        .stars-bg {
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+                radial-gradient(1px 1px at 90px 40px, #ffffff, rgba(0,0,0,0)),
+                radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.9), rgba(0,0,0,0));
+            background-repeat: repeat;
+            background-size: 250px 250px;
+            animation: starsMove 120s linear infinite;
+        }
+
+        @keyframes starsMove {
+            from { background-position: 0 0; }
+            to { background-position: 1000px 500px; }
+        }
+
+        /* Glassmorphism containers */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Subject tag styles */
+        .tag-physics { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+        .tag-chemistry { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .tag-biology { background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); }
+        .tag-astronomy { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+        .tag-geography { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+        .tag-math { background: rgba(14, 165, 233, 0.2); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4); }
+
+        /* Answer Option Animations */
+        .btn-option {
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-option:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);
+            border-color: rgba(96, 165, 250, 0.6);
+        }
+
+        .correct-btn {
+            background-color: rgba(16, 185, 129, 0.25) !important;
+            border-color: #10b981 !important;
+            color: #6ee7b7 !important;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+            animation: pulseSuccess 0.5s ease-in-out;
+        }
+
+        .wrong-btn {
+            background-color: rgba(239, 68, 68, 0.25) !important;
+            border-color: #ef4444 !important;
+            color: #fca5a5 !important;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes pulseSuccess {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        .progress-bar-fill {
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Fade transition for main question block */
+        .fade-in {
+            animation: fadeIn 0.35s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="stars-bg min-h-screen flex flex-col justify-between p-3 sm:p-6 select-none relative">
+
+    <!-- Header Title -->
+    <header class="text-center mt-2 sm:mt-4 z-10">
+        <h1 class="heading-font text-3xl sm:text-5xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 drop-shadow-lg">
+            <i class="fa-solid fa-graduation-cap mr-2 text-blue-400"></i>НАУЧНАЯ ВИКТОРИНА
+        </h1>
+        <p class="text-slate-400 text-xs sm:text-sm mt-1 font-medium">Проверь свои знания в дисциплинах и отслеживай детальную статистику!</p>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-6xl mx-auto my-auto py-4 z-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- LEFT PANEL: Statistics & Subject Performance -->
+        <aside class="lg:col-span-5 glass-card rounded-2xl p-4 sm:p-5 shadow-2xl space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-3">
+                <h2 class="heading-font text-lg font-bold text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-cyan-400"></i> Статистика
+                </h2>
+                <button id="resetBtn" class="text-xs text-slate-400 hover:text-red-400 bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-rotate-right"></i> Сброс
+                </button>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 gap-3 text-center">
+                <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl">
+                    <div class="text-xs text-slate-400 font-medium">Общий Счёт</div>
+                    <div id="statScore" class="heading-font text-2xl font-black text-blue-400 mt-1">0</div>
+                </div>
+                <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl">
+                    <div class="text-xs text-slate-400 font-medium">Точность</div>
+                    <div id="statAccuracy" class="heading-font text-2xl font-black text-purple-400 mt-1">0%</div>
+                </div>
+                <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl">
+                    <div class="text-xs text-slate-400 font-medium">Верных ответов</div>
+                    <div id="statCorrect" class="heading-font text-2xl font-black text-emerald-400 mt-1">0</div>
+                </div>
+                <div class="bg-slate-800/60 border border-slate-700/50 p-3 rounded-xl">
+                    <div class="text-xs text-slate-400 font-medium">Ошибок</div>
+                    <div id="statWrong" class="heading-font text-2xl font-black text-rose-400 mt-1">0</div>
+                </div>
+            </div>
+
+            <!-- Subject Breakdown -->
+            <div class="space-y-3 pt-1">
+                <div class="flex justify-between items-center border-b border-slate-700/40 pb-2">
+                    <h3 class="text-xs uppercase tracking-wider font-bold text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bars-progress text-amber-400"></i> Успех по предметам
+                    </h3>
+                    <span id="bestSubjectBadge" class="text-[10px] bg-emerald-950 text-emerald-300 px-2 py-0.5 rounded border border-emerald-800/50">
+                        Нет данных
+                    </span>
+                </div>
+
+                <div class="space-y-3" id="subjectsContainer">
+                    <!-- Physics -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-blue-400 flex items-center gap-1.5"><i class="fa-solid fa-atom w-4"></i> Физика</span>
+                            <span id="sub-stat-physics" class="text-slate-300">0% (0/0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                            <div id="sub-bar-physics" class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full progress-bar-fill w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Chemistry -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-emerald-400 flex items-center gap-1.5"><i class="fa-solid fa-flask w-4"></i> Химия</span>
+                            <span id="sub-stat-chemistry" class="text-slate-300">0% (0/0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                            <div id="sub-bar-chemistry" class="bg-gradient-to-r from-emerald-600 to-teal-300 h-2 rounded-full progress-bar-fill w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Biology -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-pink-400 flex items-center gap-1.5"><i class="fa-solid fa-dna w-4"></i> Биология</span>
+                            <span id="sub-stat-biology" class="text-slate-300">0% (0/0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                            <div id="sub-bar-biology" class="bg-gradient-to-r from-pink-600 to-rose-400 h-2 rounded-full progress-bar-fill w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Astronomy -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-purple-400 flex items-center gap-1.5"><i class="fa-solid fa-user-astronaut w-4"></i> Астрономия</span>
+                            <span id="sub-stat-astronomy" class="text-slate-300">0% (0/0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                            <div id="sub-bar-astronomy" class="bg-gradient-to-r from-purple-600 to-indigo-400 h-2 rounded-full progress-bar-fill w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Geography -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-earth-americas w-4"></i> География</span>
+                            <span id="sub-stat-geography" class="text-slate-300">0% (0/0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                            <div id="sub-bar-geography" class="bg-gradient-to-r from-amber-600 to-yellow-400 h-2 rounded-full progress-bar-fill w-0"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mathematics -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs font-semibold">
+                            <span class="text-sky-400 flex items-center gap-1.5"><i class="fa-solid fa-calculator w-4"></i> Математика</span>
+                            <span id="sub-stat-math" class="text-slate-300">0% (0/0)</span>
+                        </div>
+                        <div class="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden border border-slate-700/50">
+                            <div id="sub-bar-math" class="bg-gradient-to-r from-sky-600 to-cyan-300 h-2 rounded-full progress-bar-fill w-0"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT PANEL: Quiz Question & Answer Options -->
+        <section class="lg:col-span-7 flex flex-col space-y-5 w-full">
+            
+            <div id="quizCard" class="glass-card rounded-2xl p-5 sm:p-7 shadow-2xl relative overflow-hidden fade-in min-h-[360px] flex flex-col justify-between">
+                
+                <!-- Category Tag Header -->
+                <div class="flex items-center justify-between border-b border-slate-700/60 pb-4">
+                    <span id="questionCategoryTag" class="px-3.5 py-1 rounded-full text-xs font-bold tracking-wide transition-all duration-300 tag-physics flex items-center gap-1.5">
+                        <i class="fa-solid fa-atom"></i> Физика
+                    </span>
+                    <span id="questionCounter" class="text-xs text-slate-400 font-medium">Вопрос #1</span>
+                </div>
+
+                <!-- Question Text -->
+                <div class="my-6">
+                    <h2 id="questionText" class="heading-font text-lg sm:text-2xl font-bold text-slate-100 leading-snug">
+                        Загрузка вопроса...
+                    </h2>
+                </div>
+
+                <!-- 3 Options Buttons -->
+                <div class="space-y-3" id="optionsContainer">
+                    <button class="btn-option w-full p-4 rounded-xl bg-slate-800/60 border border-slate-700/80 text-left text-sm sm:text-base text-slate-200 font-medium flex items-center justify-between outline-none">
+                        <span class="option-text">Вариант 1</span>
+                        <i class="status-icon fa-regular fa-circle text-slate-500"></i>
+                    </button>
+                    <button class="btn-option w-full p-4 rounded-xl bg-slate-800/60 border border-slate-700/80 text-left text-sm sm:text-base text-slate-200 font-medium flex items-center justify-between outline-none">
+                        <span class="option-text">Вариант 2</span>
+                        <i class="status-icon fa-regular fa-circle text-slate-500"></i>
+                    </button>
+                    <button class="btn-option w-full p-4 rounded-xl bg-slate-800/60 border border-slate-700/80 text-left text-sm sm:text-base text-slate-200 font-medium flex items-center justify-between outline-none">
+                        <span class="option-text">Вариант 3</span>
+                        <i class="status-icon fa-regular fa-circle text-slate-500"></i>
+                    </button>
+                </div>
+
+                <!-- Next Question Bar -->
+                <div class="mt-6 pt-4 border-t border-slate-700/60 flex items-center justify-between">
+                    <div id="feedbackText" class="text-xs sm:text-sm font-semibold text-slate-400">
+                        Выберите вариант ответа
+                    </div>
+                    <button id="nextBtn" disabled class="px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:hover:bg-blue-600 shadow-lg transition flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed">
+                        Следующий <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center text-xs text-slate-500 py-2 z-10">
+        Научная Викторина &bull; Проверь и улучши свои знания
+    </footer>
+
+    <script>
+        // Question Data Bank (Spanning 6 subjects, each having 3 options)
+        const questionsBank = [
+            // Физика
+            { subject: "physics", subjectName: "Физика", icon: "fa-atom", tagClass: "tag-physics", question: "С какой скоростью свет распространяется в вакууме?", options: ["~300 000 км/с", "~150 000 км/с", "~1 000 000 км/с"], correct: 0 },
+            { subject: "physics", subjectName: "Физика", icon: "fa-atom", tagClass: "tag-physics", question: "Какой закон описывает силу притяжения между двумя телами?", options: ["Закон Архимеда", "Закон всемирного тяготения", "Закон Ома"], correct: 1 },
+            { subject: "physics", subjectName: "Физика", icon: "fa-atom", tagClass: "tag-physics", question: "Какое агрегатное состояние не является стандартным классическим?", options: ["Плазма", "Твёрдое", "Кристаллическое"], correct: 0 },
+            { subject: "physics", subjectName: "Физика", icon: "fa-atom", tagClass: "tag-physics", question: "В чём измеряется электрическое сопротивление в системе СИ?", options: ["Вольт", "Ампер", "Ом"], correct: 2 },
+
+            // Химия
+            { subject: "chemistry", subjectName: "Химия", icon: "fa-flask", tagClass: "tag-chemistry", question: "Какой химический элемент обозначается символом 'Au'?", options: ["Серебро", "Золото", "Алюминий"], correct: 1 },
+            { subject: "chemistry", subjectName: "Химия", icon: "fa-flask", tagClass: "tag-chemistry", question: "Какой газ преобладает в составе атмосферы Земли?", options: ["Кислород", "Углекислый газ", "Азот"], correct: 2 },
+            { subject: "chemistry", subjectName: "Химия", icon: "fa-flask", tagClass: "tag-chemistry", question: "Чему равен pH нейтральной чистой воды при комнатное температуре?", options: ["7", "0", "14"], correct: 0 },
+            { subject: "chemistry", subjectName: "Химия", icon: "fa-flask", tagClass: "tag-chemistry", question: "Какое вещество является самым твёрдым природным минералом?", options: ["Графит", "Алмаз", "Кварц"], correct: 1 },
+
+            // Биология
+            { subject: "biology", subjectName: "Биология", icon: "fa-dna", tagClass: "tag-biology", question: "Какая органелла клетки отвечает за выработку энергии (АТФ)?", options: ["Рибосома", "Митохондрия", "Ядро"], correct: 1 },
+            { subject: "biology", subjectName: "Биология", icon: "fa-dna", tagClass: "tag-biology", question: "Сколько камер имеет сердце человека?", options: ["2", "3", "4"], correct: 2 },
+            { subject: "biology", subjectName: "Биология", icon: "fa-dna", tagClass: "tag-biology", question: "Какой пигмент придаёт растениям зелёный цвет и участвует в фотосинтезе?", options: ["Хлорофилл", "Каротин", "Гемоглобин"], correct: 0 },
+            { subject: "biology", subjectName: "Биология", icon: "fa-dna", tagClass: "tag-biology", question: "Какое млекопитающее является единственным способным к активному полёту?", options: ["Летучая мышь", "Белка-летяга", "Страус"], correct: 0 },
+
+            // Астрономия
+            { subject: "astronomy", subjectName: "Астрономия", icon: "fa-user-astronaut", tagClass: "tag-astronomy", question: "Какая планета Солнечной системы является самой большой?", options: ["Сатурн", "Юпитер", "Нептун"], correct: 1 },
+            { subject: "astronomy", subjectName: "Астрономия", icon: "fa-user-astronaut", tagClass: "tag-astronomy", question: "Какая планета находится ближе всего к Солнцу?", options: ["Венера", "Марс", "Меркурий"], correct: 2 },
+            { subject: "astronomy", subjectName: "Астрономия", icon: "fa-user-astronaut", tagClass: "tag-astronomy", question: "Как называется наша галактика?", options: ["Млечный Путь", "Андромеда", "Сомбреро"], correct: 0 },
+            { subject: "astronomy", subjectName: "Астрономия", icon: "fa-user-astronaut", tagClass: "tag-astronomy", question: "Сколько времени свет от Солнца идет до Земли?", options: ["Около 8 минут", "Около 1 часа", "Мгновенно"], correct: 0 },
+
+            // География
+            { subject: "geography", subjectName: "География", icon: "fa-earth-americas", tagClass: "tag-geography", question: "Какой океан является самым большим и глубоким на Земле?", options: ["Атлантический", "Индийский", "Тихий"], correct: 2 },
+            { subject: "geography", subjectName: "География", icon: "fa-earth-americas", tagClass: "tag-geography", question: "Какая пустыня на Земле является самой крупной по площади?", options: ["Сахара", "Антарктическая", "Гоби"], correct: 1 },
+            { subject: "geography", subjectName: "География", icon: "fa-earth-americas", tagClass: "tag-geography", question: "Какая горная система является самой высокой в мире?", options: ["Гималаи", "Анды", "Альпы"], correct: 0 },
+            { subject: "geography", subjectName: "География", icon: "fa-earth-americas", tagClass: "tag-geography", question: "Какая река считается самой длинной и полноводной в мире?", options: ["Нил", "Амазонка", "Янцзы"], correct: 1 },
+
+            // Математика
+            { subject: "math", subjectName: "Математика", icon: "fa-calculator", tagClass: "tag-math", question: "Чему равен квадратный корень из 144?", options: ["12", "14", "16"], correct: 0 },
+            { subject: "math", subjectName: "Математика", icon: "fa-calculator", tagClass: "tag-math", question: "Как называется прямоугольный треугольник со сторонами 3, 4 и 5?", options: ["Египетский", "Пифагоров", "Равнобедренный"], correct: 0 },
+            { subject: "math", subjectName: "Математика", icon: "fa-calculator", tagClass: "tag-math", question: "Чему равна сумма углов любого треугольника?", options: ["90°", "180°", "360°"], correct: 1 },
+            { subject: "math", subjectName: "Математика", icon: "fa-calculator", tagClass: "tag-math", question: "Какое число не может быть записано римскими цифрами?", options: ["0", "1", "100"], correct: 0 }
+        ];
+
+        // Global State
+        let totalScore = 0;
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        let questionIndex = 0;
+        let currentQuestion = null;
+        let answeredCurrent = false;
+
+        const subjectStats = {
+            physics: { correct: 0, total: 0, name: "Физика" },
+            chemistry: { correct: 0, total: 0, name: "Химия" },
+            biology: { correct: 0, total: 0, name: "Биология" },
+            astronomy: { correct: 0, total: 0, name: "Астрономия" },
+            geography: { correct: 0, total: 0, name: "География" },
+            math: { correct: 0, total: 0, name: "Математика" }
+        };
+
+        // DOM Elements
+        const statScoreEl = document.getElementById('statScore');
+        const statAccuracyEl = document.getElementById('statAccuracy');
+        const statCorrectEl = document.getElementById('statCorrect');
+        const statWrongEl = document.getElementById('statWrong');
+        const bestSubjectBadgeEl = document.getElementById('bestSubjectBadge');
+
+        const quizCardEl = document.getElementById('quizCard');
+        const questionCategoryTagEl = document.getElementById('questionCategoryTag');
+        const questionCounterEl = document.getElementById('questionCounter');
+        const questionTextEl = document.getElementById('questionText');
+        const optionsContainerEl = document.getElementById('optionsContainer');
+        const feedbackTextEl = document.getElementById('feedbackText');
+        const nextBtnEl = document.getElementById('nextBtn');
+        const resetBtnEl = document.getElementById('resetBtn');
+
+        // Shuffles an array in place
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        let shuffledQuestions = [];
+
+        function initGame() {
+            totalScore = 0;
+            totalCorrect = 0;
+            totalWrong = 0;
+            questionIndex = 0;
+            
+            Object.keys(subjectStats).forEach(key => {
+                subjectStats[key].correct = 0;
+                subjectStats[key].total = 0;
+            });
+
+            shuffledQuestions = shuffle([...questionsBank]);
+            updateStatsUI();
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            answeredCurrent = false;
+            nextBtnEl.disabled = true;
+            feedbackTextEl.textContent = "Выберите вариант ответа";
+            feedbackTextEl.className = "text-xs sm:text-sm font-semibold text-slate-400";
+
+            if (questionIndex >= shuffledQuestions.length) {
+                shuffledQuestions = shuffle([...questionsBank]);
+                questionIndex = 0;
+            }
+
+            currentQuestion = shuffledQuestions[questionIndex];
+            
+            // Animation reset
+            quizCardEl.classList.remove('fade-in');
+            void quizCardEl.offsetWidth;
+            quizCardEl.classList.add('fade-in');
+
+            // Category tag
+            questionCategoryTagEl.className = `px-3.5 py-1 rounded-full text-xs font-bold tracking-wide transition-all duration-300 ${currentQuestion.tagClass} flex items-center gap-1.5`;
+            questionCategoryTagEl.innerHTML = `<i class="fa-solid ${currentQuestion.icon}"></i> ${currentQuestion.subjectName}`;
+
+            questionCounterEl.textContent = `Вопрос #${questionIndex + 1}`;
+            questionTextEl.textContent = currentQuestion.question;
+
+            // Render options buttons
+            optionsContainerEl.innerHTML = '';
+            currentQuestion.options.forEach((optionText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-option w-full p-4 rounded-xl bg-slate-800/60 border border-slate-700/80 text-left text-sm sm:text-base text-slate-200 font-medium flex items-center justify-between outline-none cursor-pointer';
+                btn.dataset.index = idx;
+
+                btn.innerHTML = `
+                    <span class="option-text">${optionText}</span>
+                    <i class="status-icon fa-regular fa-circle text-slate-500"></i>
+                `;
+
+                btn.addEventListener('click', () => handleOptionSelect(idx, btn));
+                optionsContainerEl.appendChild(btn);
+            });
+        }
+
+        function handleOptionSelect(selectedIndex, selectedBtn) {
+            if (answeredCurrent) return;
+            answeredCurrent = true;
+
+            const isCorrect = selectedIndex === currentQuestion.correct;
+            const sub = currentQuestion.subject;
+
+            subjectStats[sub].total++;
+
+            if (isCorrect) {
+                totalScore += 10;
+                totalCorrect++;
+                subjectStats[sub].correct++;
+
+                selectedBtn.classList.add('correct-btn');
+                const icon = selectedBtn.querySelector('.status-icon');
+                icon.className = 'status-icon fa-solid fa-circle-check text-emerald-400';
+
+                feedbackTextEl.textContent = "Верно! +10 очков";
+                feedbackTextEl.className = "text-xs sm:text-sm font-bold text-emerald-400";
+            } else {
+                totalWrong++;
+                selectedBtn.classList.add('wrong-btn');
+                const icon = selectedBtn.querySelector('.status-icon');
+                icon.className = 'status-icon fa-solid fa-circle-xmark text-rose-400';
+
+                // Highlight correct option
+                const allButtons = optionsContainerEl.querySelectorAll('button');
+                allButtons.forEach((btn) => {
+                    if (parseInt(btn.dataset.index) === currentQuestion.correct) {
+                        btn.classList.add('correct-btn');
+                        const correctIcon = btn.querySelector('.status-icon');
+                        correctIcon.className = 'status-icon fa-solid fa-circle-check text-emerald-400';
+                    }
+                });
+
+                feedbackTextEl.textContent = "Неверно!";
+                feedbackTextEl.className = "text-xs sm:text-sm font-bold text-rose-400";
+            }
+
+            // Disable all option buttons
+            const optionBtns = optionsContainerEl.querySelectorAll('button');
+            optionBtns.forEach(btn => btn.disabled = true);
+
+            nextBtnEl.disabled = false;
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            statScoreEl.textContent = totalScore;
+            statCorrectEl.textContent = totalCorrect;
+            statWrongEl.textContent = totalWrong;
+
+            const totalAnswered = totalCorrect + totalWrong;
+            const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+            statAccuracyEl.textContent = `${accuracy}%`;
+
+            // Update subject bars & percentages
+            let bestSubject = null;
+            let highestAccuracy = -1;
+
+            Object.keys(subjectStats).forEach(key => {
+                const data = subjectStats[key];
+                const statTextEl = document.getElementById(`sub-stat-${key}`);
+                const barEl = document.getElementById(`sub-bar-${key}`);
+
+                const subAcc = data.total > 0 ? Math.round((data.correct / data.total) * 100) : 0;
+
+                if (statTextEl) {
+                    statTextEl.textContent = `${subAcc}% (${data.correct}/${data.total})`;
+                }
+
+                if (barEl) {
+                    barEl.style.width = `${subAcc}%`;
+                }
+
+                if (data.total > 0 && subAcc > highestAccuracy) {
+                    highestAccuracy = subAcc;
+                    bestSubject = data.name;
+                }
+            });
+
+            if (bestSubject) {
+                bestSubjectBadgeEl.textContent = `Лидер: ${bestSubject}`;
+            } else {
+                bestSubjectBadgeEl.textContent = "Нет данных";
+            }
+        }
+
+        // Next Question Button Click
+        nextBtnEl.addEventListener('click', () => {
+            questionIndex++;
+            loadQuestion();
+        });
+
+        // Reset Game Button Click
+        resetBtnEl.addEventListener('click', () => {
+            initGame();
+        });
+
+        // Initialize on page load
+        window.onload = function() {
+            initGame();
+        };
+    </script>
+</body>
+</html>

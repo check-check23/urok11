@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Трекер привычек</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans for clean typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Custom Theme Colors with Olive Palette -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        olive: {
+                            50: '#f6f7f2',
+                            100: '#eaebd9',
+                            200: '#d7dac2',
+                            300: '#bec3a3',
+                            400: '#a2a881',
+                            500: '#878f65', // Base Olive
+                            600: '#6b724e',
+                            700: '#53593e',
+                            800: '#434734',
+                            900: '#383b2d',
+                        },
+                        cream: {
+                            50: '#fdfbf7',
+                            100: '#f7f3e9',
+                            200: '#ede5d3',
+                        },
+                        sage: {
+                            100: '#e6ede4',
+                            500: '#8fad88',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #f7f3e9;
+            color: #383b2d;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ede5d3;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #bec3a3;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #878f65;
+        }
+
+        /* Subtle Transitions */
+        .habit-card {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .habit-card:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Checkbox Ripple & Animation */
+        .day-check {
+            transition: all 0.2s ease-in-out;
+        }
+        .day-check:active {
+            transform: scale(0.9);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 sm:p-6 md:p-10 flex flex-col items-center justify-start">
+
+    <!-- Main Application Container -->
+    <div class="w-full max-w-3xl space-y-6">
+
+        <!-- App Header & Date -->
+        <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-cream-200 shadow-sm">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-olive-900 flex items-center gap-2">
+                    <span>🌿</span> Трекер привычек
+                </h1>
+                <p id="current-date-text" class="text-xs sm:text-sm font-medium text-olive-600 mt-1">
+                    Загрузка даты...
+                </p>
+            </div>
+            
+            <!-- Quick Stats Pill -->
+            <div class="bg-olive-50 px-4 py-2.5 rounded-2xl border border-olive-100 flex items-center gap-3 self-stretch sm:self-auto justify-between">
+                <div>
+                    <span class="block text-[10px] uppercase tracking-wider font-bold text-olive-600">Сегодня выполнено</span>
+                    <span id="header-stats" class="text-lg font-bold text-olive-900">0 из 0</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-olive-500 text-white flex items-center justify-center font-bold text-sm shadow-inner" id="progress-percentage">
+                    0%
+                </div>
+            </div>
+        </header>
+
+        <!-- Daily Progress Bar Card -->
+        <section class="bg-white p-6 rounded-3xl border border-cream-200 shadow-sm space-y-3">
+            <div class="flex justify-between items-center text-sm font-semibold text-olive-800">
+                <span>Прогресс за сегодня</span>
+                <span id="progress-text-detail">0% получено</span>
+            </div>
+            <div class="w-full bg-cream-100 h-3.5 rounded-full overflow-hidden p-0.5 border border-cream-200">
+                <div id="main-progress-bar" class="bg-gradient-to-r from-olive-400 to-olive-600 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+        </section>
+
+        <!-- Add New Habit Form -->
+        <section class="bg-white p-5 sm:p-6 rounded-3xl border border-cream-200 shadow-sm">
+            <h2 class="text-base font-bold text-olive-900 mb-3 flex items-center gap-2">
+                <span>✨</span> Добавить новую привычку
+            </h2>
+            <form id="add-habit-form" class="flex flex-col sm:flex-row gap-3">
+                <!-- Habit Title Input -->
+                <div class="flex-1 relative">
+                    <input type="text" id="habit-name-input" placeholder="Например: Птичка утренняя зарядка, Пить воду..." 
+                        class="w-full pl-4 pr-10 py-3 rounded-2xl bg-cream-50 border border-cream-200 text-olive-900 placeholder-olive-400 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:bg-white transition-all text-sm font-medium"
+                        required maxlength="40">
+                </div>
+
+                <!-- Icon Selector -->
+                <div class="flex gap-2">
+                    <select id="habit-icon-select" class="px-3 py-3 rounded-2xl bg-cream-50 border border-cream-200 text-olive-800 focus:outline-none focus:ring-2 focus:ring-olive-500 text-base cursor-pointer">
+                        <option value="💧">💧 Вода</option>
+                        <option value="🏃">🏃 Спорт</option>
+                        <option value="📖">📖 Чтение</option>
+                        <option value="🧘">🧘 Медитация</option>
+                        <option value="🥗">🥗 Питание</option>
+                        <option value="😴">😴 Сон</option>
+                        <option value="💻">💻 Кодинг</option>
+                        <option value="🎨">🎨 Творчество</option>
+                        <option value="🌱">🌱 Развитие</option>
+                    </select>
+
+                    <button type="submit" 
+                        class="bg-olive-600 hover:bg-olive-700 active:bg-olive-800 text-white font-semibold px-6 py-3 rounded-2xl transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 text-sm whitespace-nowrap">
+                        <span>+</span>
+                        <span>Создать</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Habit List Section -->
+        <section class="space-y-4">
+            <div class="flex justify-between items-center px-2">
+                <h2 class="text-lg font-bold text-olive-900">Мои привычки</h2>
+                <span id="habit-count" class="text-xs font-semibold px-3 py-1 bg-olive-100 text-olive-800 rounded-full">0 привычек</span>
+            </div>
+
+            <!-- Empty State Notice -->
+            <div id="empty-state" class="hidden text-center py-12 px-6 bg-white/60 rounded-3xl border border-dashed border-olive-200 space-y-3">
+                <div class="text-4xl">🪴</div>
+                <h3 class="text-base font-bold text-olive-800">Список привычек пуст</h3>
+                <p class="text-xs text-olive-600 max-w-sm mx-auto">
+                    Добавьте свою первую привычку выше, чтобы начать путь к регулярности и укрепить личный прогресс!
+                </p>
+            </div>
+
+            <!-- Habit Items Wrapper -->
+            <div id="habit-list-container" class="space-y-3">
+                <!-- Habit items will be dynamically rendered here -->
+            </div>
+        </section>
+        
+        <!-- Footer Info -->
+        <footer class="text-center text-xs text-olive-500 pt-4 pb-2">
+            Все данные автоматически сохраняются в вашем браузере (LocalStorage)
+        </footer>
+
+    </div>
+
+    <script>
+        // Storage Key
+        const STORAGE_KEY = 'olive_habit_tracker_data_v1';
+
+        // App State
+        let habits = [];
+
+        // DOM Elements
+        const addHabitForm = document.getElementById('add-habit-form');
+        const habitNameInput = document.getElementById('habit-name-input');
+        const habitIconSelect = document.getElementById('habit-icon-select');
+        const habitListContainer = document.getElementById('habit-list-container');
+        const emptyState = document.getElementById('empty-state');
+        const currentDateText = document.getElementById('current-date-text');
+        const headerStats = document.getElementById('header-stats');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const mainProgressBar = document.getElementById('main-progress-bar');
+        const progressTextDetail = document.getElementById('progress-text-detail');
+        const habitCountBadge = document.getElementById('habit-count');
+
+        // Format ISO Date (YYYY-MM-DD)
+        function formatDateKey(dateObj) {
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const day = String(dateObj.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Get Today's Date String
+        function getTodayString() {
+            return formatDateKey(new Date());
+        }
+
+        // Generate Array of Last 7 Days (including today)
+        function getLast7Days() {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                days.push({
+                    dateKey: formatDateKey(d),
+                    dayName: d.toLocaleDateString('ru-RU', { weekday: 'short' }),
+                    dayNumber: d.getDate(),
+                    isToday: i === 0
+                });
+            }
+            return days;
+        }
+
+        // Update Header Date Display
+        function renderHeaderDate() {
+            const today = new Date();
+            const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+            const formatted = today.toLocaleDateString('ru-RU', options);
+            currentDateText.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+
+        // Load Habits from LocalStorage
+        function loadHabits() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY);
+                if (stored) {
+                    habits = JSON.parse(stored);
+                } else {
+                    // Default Initial Habits
+                    habits = [
+                        {
+                            id: 'default-1',
+                            title: 'Пить 2 литра воды',
+                            icon: '💧',
+                            history: { [getTodayString()]: true }
+                        },
+                        {
+                            id: 'default-2',
+                            title: 'Утренняя зарядка 15 мин',
+                            icon: '🏃',
+                            history: {}
+                        },
+                        {
+                            id: 'default-3',
+                            title: 'Чтение книги перед сном',
+                            icon: '📖',
+                            history: {}
+                        }
+                    ];
+                    saveHabits();
+                }
+            } catch (e) {
+                console.error('Ошибка загрузки данных из LocalStorage', e);
+                habits = [];
+            }
+        }
+
+        // Save Habits to LocalStorage
+        function saveHabits() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(habits));
+            } catch (e) {
+                console.error('Ошибка сохранения данных в LocalStorage', e);
+            }
+        }
+
+        // Add New Habit
+        function addHabit(title, icon) {
+            const newHabit = {
+                id: 'habit_' + Date.now(),
+                title: title.trim(),
+                icon: icon,
+                history: {}
+            };
+            habits.unshift(newHabit);
+            saveHabits();
+            renderApp();
+        }
+
+        // Delete Habit
+        function deleteHabit(habitId) {
+            if (confirm('Вы уверены, что хотите удалить эту привычку?')) {
+                habits = habits.filter(h => h.id !== habitId);
+                saveHabits();
+                renderApp();
+            }
+        }
+
+        // Toggle Habit Completion for Specific Date
+        function toggleHabitDay(habitId, dateKey) {
+            const habit = habits.find(h => h.id === habitId);
+            if (habit) {
+                if (habit.history[dateKey]) {
+                    delete habit.history[dateKey];
+                } else {
+                    habit.history[dateKey] = true;
+                }
+                saveHabits();
+                renderApp();
+            }
+        }
+
+        // Calculate Statistics
+        function updateStats() {
+            const todayKey = getTodayString();
+            const total = habits.length;
+            
+            if (total === 0) {
+                headerStats.textContent = `0 из 0`;
+                progressPercentage.textContent = `0%`;
+                mainProgressBar.style.width = `0%`;
+                progressTextDetail.textContent = `0% получено`;
+                habitCountBadge.textContent = `0 привычек`;
+                return;
+            }
+
+            const completedToday = habits.filter(h => h.history && h.history[todayKey]).length;
+            const percentage = Math.round((completedToday / total) * 100);
+
+            headerStats.textContent = `${completedToday} из ${total}`;
+            progressPercentage.textContent = `${percentage}%`;
+            mainProgressBar.style.width = `${percentage}%`;
+            progressTextDetail.textContent = `${percentage}% выполнено`;
+            habitCountBadge.textContent = `${total} ${getPluralForm(total, ['привычка', 'привычки', 'привычек'])}`;
+        }
+
+        // Helper function for Russian Plural Forms
+        function getPluralForm(number, titles) {
+            const cases = [2, 0, 1, 1, 1, 2];
+            return titles[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[(number % 10 < 5) ? number % 10 : 5]];
+        }
+
+        // Main Render Function
+        function renderApp() {
+            const days = getLast7Days();
+            const todayKey = getTodayString();
+
+            // Toggle Empty State
+            if (habits.length === 0) {
+                emptyState.classList.remove('hidden');
+                habitListContainer.innerHTML = '';
+            } else {
+                emptyState.classList.add('hidden');
+                
+                // Render Habit List
+                habitListContainer.innerHTML = habits.map(habit => {
+                    const isDoneToday = Boolean(habit.history && habit.history[todayKey]);
+
+                    // Render Day Circles for 7 days
+                    const daysHtml = days.map(day => {
+                        const isDone = Boolean(habit.history && habit.history[day.dateKey]);
+                        
+                        let circleClasses = "w-7 h-7 sm:w-8 sm:h-8 rounded-xl flex items-center justify-center text-xs font-semibold cursor-pointer transition-all day-check ";
+                        
+                        if (isDone) {
+                            circleClasses += "bg-olive-500 text-white shadow-sm hover:bg-olive-600 ";
+                        } else if (day.isToday) {
+                            circleClasses += "bg-cream-200 text-olive-800 border-2 border-olive-400 hover:bg-cream-300 ";
+                        } else {
+                            circleClasses += "bg-cream-100 text-olive-400 hover:bg-cream-200 ";
+                        }
+
+                        return `
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="text-[10px] font-medium text-olive-500 uppercase">${day.dayName}</span>
+                                <button type="button" 
+                                    onclick="toggleHabitDay('${habit.id}', '${day.dateKey}')"
+                                    class="${circleClasses}"
+                                    title="${day.dayName}, ${day.dayNumber}: ${isDone ? 'Выполнено' : 'Не выполнено'}">
+                                    ${isDone ? '✓' : day.dayNumber}
+                                </button>
+                            </div>
+                        `;
+                    }).join('');
+
+                    return `
+                        <div class="habit-card bg-white p-4 sm:p-5 rounded-3xl border border-cream-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            
+                            <!-- Left: Habit Info and Today Check -->
+                            <div class="flex items-center justify-between md:justify-start gap-3">
+                                <div class="flex items-center gap-3">
+                                    <!-- Icon Pill -->
+                                    <div class="w-11 h-11 rounded-2xl bg-cream-100 flex items-center justify-center text-xl shrink-0 border border-cream-200">
+                                        ${habit.icon}
+                                    </div>
+                                    <!-- Title -->
+                                    <div>
+                                        <h3 class="font-bold text-olive-900 text-sm sm:text-base ${isDoneToday ? 'line-through text-olive-400' : ''}">
+                                            ${escapeHtml(habit.title)}
+                                        </h3>
+                                        <span class="text-xs text-olive-500">
+                                            ${calculateStreak(habit)} дн. подряд
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons Mobile / Extra -->
+                                <button onclick="deleteHabit('${habit.id}')" 
+                                    class="md:hidden text-olive-300 hover:text-red-500 p-2 transition-colors text-sm" 
+                                    title="Удалить привычку">
+                                    🗑️
+                                </button>
+                            </div>
+
+                            <!-- Middle / Right: 7 Days Grid -->
+                            <div class="flex items-center justify-between md:justify-end gap-2 sm:gap-3 border-t md:border-t-0 pt-3 md:pt-0 border-cream-100">
+                                <div class="flex gap-1.5 sm:gap-2">
+                                    ${daysHtml}
+                                </div>
+
+                                <!-- Delete Button Desktop -->
+                                <button onclick="deleteHabit('${habit.id}')" 
+                                    class="hidden md:block text-cream-200 hover:text-red-400 p-1.5 transition-colors text-base ml-2" 
+                                    title="Удалить привычку">
+                                    ✕
+                                </button>
+                            </div>
+
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStats();
+        }
+
+        // Calculate consecutive streak days
+        function calculateStreak(habit) {
+            if (!habit.history) return 0;
+            let streak = 0;
+            let checkDate = new Date();
+
+            // Check if done today or yesterday to continue streak
+            let dateKey = formatDateKey(checkDate);
+            if (!habit.history[dateKey]) {
+                // If not done today, check yesterday
+                checkDate.setDate(checkDate.getDate() - 1);
+                dateKey = formatDateKey(checkDate);
+            }
+
+            while (habit.history[dateKey]) {
+                streak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+                dateKey = formatDateKey(checkDate);
+            }
+
+            return streak;
+        }
+
+        // Sanitize Input Strings
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        // Event Listener: Form Submission
+        addHabitForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = habitNameInput.value;
+            const icon = habitIconSelect.value;
+            if (name.trim()) {
+                addHabit(name, icon);
+                habitNameInput.value = '';
+                habitNameInput.focus();
+            }
+        });
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            renderHeaderDate();
+            loadHabits();
+            renderApp();
+        });
+    </script>
+</body>
+</html>

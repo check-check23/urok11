@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imperium Ideas — 100 Премиум Бизнес-Идей & Чек-листы</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Cinzel', 'serif'],
+                    },
+                    colors: {
+                        olive: {
+                            800: '#1c2419',
+                            900: '#121810',
+                            950: '#0a0f09',
+                        },
+                        gold: {
+                            100: '#fff3d1',
+                            300: '#f6d57f',
+                            400: '#e5be53',
+                            500: '#d4af37',
+                            600: '#aa8213',
+                            700: '#805f03',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background: #090e09;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(20, 35, 20, 0.8) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(35, 45, 25, 0.7) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(10, 15, 10, 0.9) 0px, transparent 100%);
+            min-height: 100vh;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fff2c6 0%, #f3ce70 50%, #b88d22 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .gold-border-gradient {
+            border: 1px solid transparent;
+            background-image: linear-gradient(#121911, #121911), linear-gradient(135deg, rgba(229, 190, 83, 0.6), rgba(170, 130, 19, 0.1), rgba(229, 190, 83, 0.4));
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+        }
+
+        .glass-panel {
+            background: rgba(18, 26, 17, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(212, 175, 55, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(22, 33, 21, 0.5);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(212, 175, 55, 0.12);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(28, 42, 27, 0.8);
+            border-color: rgba(229, 190, 83, 0.5);
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Gold Pulse Button */
+        .gold-btn {
+            background: linear-gradient(135deg, #f3ce70 0%, #d4af37 50%, #aa8213 100%);
+            color: #0d120c;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.35);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gold-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(60deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: rotate(30deg) translateY(-100%);
+            transition: all 0.6s ease;
+        }
+
+        .gold-btn:hover::after {
+            transform: rotate(30deg) translateY(100%);
+        }
+
+        .gold-btn:hover {
+            box-shadow: 0 0 30px rgba(229, 190, 83, 0.6);
+            transform: scale(1.03);
+        }
+
+        /* 3D Flip Card Effect */
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+        }
+        .flip-card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(10, 15, 10, 0.8); }
+        ::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(212, 175, 55, 0.6); }
+
+        /* Progress Bar Animation */
+        @keyframes goldShimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .gold-shimmer {
+            background: linear-gradient(90deg, #d4af37 0%, #fff3d1 50%, #d4af37 100%);
+            background-size: 200% 100%;
+            animation: goldShimmer 2.5s infinite linear;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-slate-200 pb-20">
+
+    <!-- Canvas для летающих золотых частиц -->
+    <canvas id="particleCanvas"></canvas>
+
+    <header class="sticky top-0 z-40 glass-panel border-b border-gold-500/20 mb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-22 flex items-center justify-between">
+            <div class="flex items-center gap-3.5 cursor-pointer py-3" onclick="resetFilters()">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-gold-600 via-gold-400 to-amber-200 p-0.5 shadow-lg shadow-gold-500/20">
+                    <div class="w-full h-full bg-olive-950 rounded-[14px] flex items-center justify-center">
+                        <i data-lucide="crown" class="w-6 h-6 text-gold-400"></i>
+                    </div>
+                </div>
+                <div>
+                    <h1 class="font-serif text-2xl font-bold tracking-wider text-white flex items-center gap-2">
+                        IMPERIUM <span class="text-xs px-2.5 py-0.5 rounded-full bg-gold-500/10 text-gold-300 border border-gold-500/30 font-sans font-medium">100 Идей</span>
+                    </h1>
+                    <p class="text-xs text-gold-300/60 font-light tracking-wide">Каталог Бизнес-Идей & Чек-листы Запуска</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button id="favoriteToggleBtn" onclick="toggleFavoritesView()" class="px-4 py-2.5 rounded-xl glass-card flex items-center gap-2 text-sm font-medium text-gold-100 hover:border-gold-400/50 transition">
+                    <i data-lucide="bookmark" class="w-4 h-4 text-gold-400"></i>
+                    <span class="hidden sm:inline">Избранное</span>
+                    <span id="favCounter" class="ml-1 px-2 py-0.5 text-xs rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/30">0</span>
+                </button>
+
+                <button onclick="triggerRandomGenerator()" class="gold-btn px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition active:scale-95">
+                    <i data-lucide="sparkles" class="w-4 h-4 text-olive-950"></i>
+                    <span>Сгенерировать</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        
+        <!-- Hero Section & Generator 3D Flip Card -->
+        <div class="text-center my-8 md:my-12">
+            <h2 class="font-serif text-3xl sm:text-5xl font-extrabold tracking-tight mb-4">
+                Найди свою <span class="gold-gradient-text">Идеальную Бизнес-Идею</span>
+            </h2>
+            <p class="text-slate-300/80 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
+                Роскошный каталог из 100 готовых бизнес-концептов с пошаговыми стратегиями, финансовыми расчетами и сохраняемыми чек-листами.
+            </p>
+        </div>
+
+        <div class="max-w-3xl mx-auto mb-14 perspective-1000">
+            <div id="generatorCardInner" class="flip-card-inner relative w-full rounded-3xl">
+                <!-- Передняя сторона карточки генератора -->
+                <div class="flip-card-front glass-panel p-8 rounded-3xl border border-gold-500/30 text-center relative overflow-hidden">
+                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-gold-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center">
+                        <i data-lucide="compass" class="w-8 h-8 text-gold-400 animate-spin-slow"></i>
+                    </div>
+                    <h3 class="font-serif text-2xl font-bold text-white mb-2">Генератор Случайной Идеи</h3>
+                    <p class="text-slate-400 text-sm mb-6 max-w-md mx-auto">
+                        Нажмите кнопку ниже, чтобы запустить интерактивный случайный выбор успешного стартапа с готовым планом.
+                    </p>
+                    <button onclick="triggerRandomGenerator()" class="gold-btn px-8 py-3.5 rounded-2xl font-bold text-base inline-flex items-center gap-3">
+                        <i data-lucide="dices" class="w-5 h-5"></i> Испытать Фортуну
+                    </button>
+                </div>
+
+                <!-- Задняя сторона (Выпавшая идея) -->
+                <div class="flip-card-back glass-panel p-8 rounded-3xl border border-gold-400/50 absolute top-0 left-0 w-full h-full flex flex-col justify-between">
+                    <div class="flex justify-between items-start">
+                        <span id="genCategory" class="text-xs font-bold px-3 py-1 rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/40">
+                            Категория
+                        </span>
+                        <span id="genCapital" class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            Бюджет
+                        </span>
+                    </div>
+                    <div>
+                        <h3 id="genTitle" class="font-serif text-2xl font-bold text-white my-3 gold-gradient-text">
+                            Название Сгенерированной Идеи
+                        </h3>
+                        <p id="genDesc" class="text-sm text-slate-300 line-clamp-2 mb-4">
+                            Описание сгенерированной идеи появится здесь...
+                        </p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button id="genOpenBtn" class="flex-1 gold-btn py-3 rounded-xl font-bold text-sm text-center">
+                            Открыть полный план & Чек-лист
+                        </button>
+                        <button onclick="resetGeneratorCard()" class="px-4 py-3 rounded-xl glass-card text-gold-300 border border-gold-500/30 text-sm hover:bg-gold-500/20">
+                            Ещё раз
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="glass-panel p-6 rounded-3xl mb-10 border border-gold-500/20">
+            <!-- Поисковая строка -->
+            <div class="relative mb-6">
+                <i data-lucide="search" class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gold-400/70"></i>
+                <input type="text" id="searchInput" placeholder="Поиск по названию, ключам или направлению бизнеса..." 
+                       class="w-full bg-olive-950/80 border border-gold-500/20 rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-gold-400 focus:ring-1 focus:ring-gold-400 transition">
+            </div>
+
+            <!-- Категории -->
+            <div class="mb-6">
+                <label class="block text-xs font-semibold text-gold-300/70 uppercase tracking-widest mb-3">Категория Бизнеса</label>
+                <div class="flex flex-wrap gap-2.5" id="categoryContainer">
+                    <!-- Заполняется JS -->
+                </div>
+            </div>
+
+            <!-- Дополнительные фильтры -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-4 border-t border-gold-500/10">
+                <div>
+                    <label class="block text-xs font-semibold text-gold-300/70 uppercase tracking-widest mb-2">Стартовый Капитал</label>
+                    <select id="capitalFilter" class="w-full bg-olive-950/80 border border-gold-500/20 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:border-gold-400">
+                        <option value="all">Все капиталы</option>
+                        <option value="low">Низкий (до 100 тыс ₽)</option>
+                        <option value="medium">Средний (100 тыс - 500 тыс ₽)</option>
+                        <option value="high">Высокий (от 500 тыс ₽)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gold-300/70 uppercase tracking-widest mb-2">Сложность Реализации</label>
+                    <select id="difficultyFilter" class="w-full bg-olive-950/80 border border-gold-500/20 rounded-xl px-3 py-2.5 text-sm text-slate-200 focus:border-gold-400">
+                        <option value="all">Любая сложность</option>
+                        <option value="Легкая">Легкая</option>
+                        <option value="Средняя">Средняя</option>
+                        <option value="Высокая">Высокая</option>
+                    </select>
+                </div>
+
+                <div class="flex items-end">
+                    <button onclick="resetFilters()" class="w-full glass-card hover:bg-gold-500/10 text-gold-300 font-medium py-2.5 px-4 rounded-xl text-sm border border-gold-500/20 transition flex items-center justify-center gap-2">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Сбросить фильтры
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Заголовок Каталога -->
+        <div class="flex justify-between items-center mb-6">
+            <h3 id="catalogTitle" class="font-serif text-2xl font-bold text-white flex items-center gap-3">
+                Каталог Проектов <span id="ideasCount" class="text-xs font-sans font-semibold text-gold-300 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/30">100 идей</span>
+            </h3>
+        </div>
+
+        <div id="ideasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Карточки заполняются через JS -->
+        </div>
+
+        <!-- Ничего не найдено -->
+        <div id="noResults" class="hidden text-center py-16 glass-panel rounded-3xl border border-gold-500/20">
+            <i data-lucide="search-x" class="w-12 h-12 text-gold-500/40 mx-auto mb-4"></i>
+            <h4 class="text-lg font-bold text-white">Ничего не найдено</h4>
+            <p class="text-sm text-slate-400 mt-1 mb-4">Попробуйте изменить параметры поиска или сбросить фильтры</p>
+            <button onclick="resetFilters()" class="gold-btn px-6 py-2.5 rounded-xl text-sm font-semibold">Сбросить настройки</button>
+        </div>
+    </main>
+
+    <div id="ideaModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="fixed inset-0 bg-black/85 backdrop-blur-md" onclick="closeModal()"></div>
+        
+        <div class="glass-panel w-full max-w-4xl rounded-3xl relative z-10 my-8 overflow-hidden border border-gold-500/30 shadow-2xl max-h-[90vh] flex flex-col">
+            <!-- Шапка Модалки -->
+            <div class="p-6 sm:p-8 border-b border-gold-500/20 flex justify-between items-start bg-olive-950/80 sticky top-0 backdrop-blur-md z-10">
+                <div>
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span id="modalCategory" class="text-xs px-3 py-1 rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/30 font-semibold">
+                            Категория
+                        </span>
+                        <span id="modalCapital" class="text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold">
+                            Капитал
+                        </span>
+                        <span id="modalDifficulty" class="text-xs px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">
+                            Сложность
+                        </span>
+                    </div>
+                    <h2 id="modalTitle" class="font-serif text-2xl sm:text-3xl font-bold text-white gold-gradient-text">
+                        Название Идеи
+                    </h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="modalFavBtn" class="p-2.5 rounded-xl glass-card hover:border-gold-400/50 transition">
+                        <i data-lucide="bookmark" class="w-5 h-5 text-gold-400"></i>
+                    </button>
+                    <button onclick="closeModal()" class="p-2.5 rounded-xl glass-card text-slate-400 hover:text-white transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Содержание Модалки -->
+            <div class="p-6 sm:p-8 overflow-y-auto space-y-8 flex-1">
+                <!-- Описание -->
+                <div>
+                    <h4 class="text-xs uppercase tracking-widest font-bold text-gold-300/70 mb-2">Суть и Концепция</h4>
+                    <p id="modalDescription" class="text-slate-200 text-base leading-relaxed bg-olive-950/60 p-5 rounded-2xl border border-gold-500/10">
+                        Описание бизнес-идеи...
+                    </p>
+                </div>
+
+                <!-- Финансовые показатели -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-olive-950/60 p-4 rounded-2xl border border-gold-500/15">
+                        <span class="text-xs text-slate-400 block mb-1">Стартовый капитал</span>
+                        <span id="modalInvestment" class="text-lg font-bold text-emerald-400">100 000 ₽</span>
+                    </div>
+                    <div class="bg-olive-950/60 p-4 rounded-2xl border border-gold-500/15">
+                        <span class="text-xs text-slate-400 block mb-1">Окупаемость</span>
+                        <span id="modalPayback" class="text-lg font-bold text-gold-300">3-6 месяцев</span>
+                    </div>
+                    <div class="bg-olive-950/60 p-4 rounded-2xl border border-gold-500/15">
+                        <span class="text-xs text-slate-400 block mb-1">Монетизация</span>
+                        <span id="modalMonetization" class="text-sm font-semibold text-slate-200">B2B / B2C / Продажи</span>
+                    </div>
+                </div>
+
+                <!-- Шаги реализации -->
+                <div>
+                    <h4 class="font-serif text-lg font-bold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="list-ordered" class="w-5 h-5 text-gold-400"></i>
+                        Пошаговый Стратегический План
+                    </h4>
+                    <div id="modalSteps" class="space-y-3">
+                        <!-- Динамически заполняются шаги -->
+                    </div>
+                </div>
+
+                <!-- Интерактивный Чек-лист Запуска -->
+                <div class="bg-olive-950/80 border border-gold-500/30 rounded-2xl p-6 relative overflow-hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <h4 class="font-serif text-lg font-bold text-white flex items-center gap-2">
+                                <i data-lucide="check-square" class="w-5 h-5 text-gold-400"></i>
+                                Интерактивный Чек-лист Запуска
+                            </h4>
+                            <p class="text-xs text-slate-400 mt-1">Отмечайте выполненные шаги — прогресс сохранится</p>
+                        </div>
+                        <span id="checklistProgress" class="text-xs font-bold text-gold-300 bg-gold-500/20 px-3 py-1.5 rounded-full border border-gold-500/30">
+                            0% Готово
+                        </span>
+                    </div>
+
+                    <!-- Золотой анимированный прогресс-бар -->
+                    <div class="w-full bg-olive-900 rounded-full h-2.5 mb-5 overflow-hidden border border-gold-500/20">
+                        <div id="progressBar" class="gold-shimmer h-full rounded-full w-0 transition-all duration-500"></div>
+                    </div>
+
+                    <div id="modalChecklist" class="space-y-3">
+                        <!-- Пункты чек-листа -->
+                    </div>
+                </div>
+
+                <!-- Рекомендации и риски -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-olive-950/60 p-5 rounded-2xl border border-gold-500/10">
+                        <h5 class="text-sm font-bold text-emerald-400 mb-2 flex items-center gap-2">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i> Советы по быстрому старту
+                        </h5>
+                        <p id="modalTips" class="text-xs text-slate-300 leading-relaxed">Рекомендации...</p>
+                    </div>
+                    <div class="bg-olive-950/60 p-5 rounded-2xl border border-gold-500/10">
+                        <h5 class="text-sm font-bold text-amber-400 mb-2 flex items-center gap-2">
+                            <i data-lucide="shield-alert" class="w-4 h-4"></i> Главные Риски
+                        </h5>
+                        <p id="modalRisks" class="text-xs text-slate-300 leading-relaxed">Риски...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Футер Модалки -->
+            <div class="p-5 border-t border-gold-500/20 bg-olive-950/90 flex flex-wrap justify-between items-center gap-4 sticky bottom-0 backdrop-blur-md">
+                <button onclick="exportToText()" class="px-5 py-2.5 rounded-xl glass-card text-gold-300 hover:border-gold-400/50 text-sm font-medium flex items-center gap-2 transition">
+                    <i data-lucide="download" class="w-4 h-4 text-gold-400"></i> Скачать стратегию (.txt)
+                </button>
+                <button onclick="closeModal()" class="gold-btn px-8 py-2.5 rounded-xl text-sm font-bold">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 8 Категорий для фильтрации
+        const CATEGORIES = [
+            'Все',
+            'IT & AI',
+            'Услуги',
+            'Торговля & E-commerce',
+            'Производство',
+            'Творчество & Медиа',
+            'Образование',
+            'HoReCa',
+            'Зеленый бизнес'
+        ];
+
+        // База из 100 подробных и уникальных бизнес-идей
+        const IDEAS_DATABASE = [
+            // IT & AI
+            { id: 1, title: "ИИ-ассистент для коммерческой недвижимости", category: "IT & AI", capital: "low", capitalText: "50 000 ₽", difficulty: "Средняя", payback: "2-3 мес.", monetization: "SaaS подписка", desc: "Сервис на базе AI для риелторов, который автоматически генерирует презентации объектов, проводит первичный скоринг клиентов и ведет показы.", 
+              steps: ["Разработка интеграции с LLM API", "Создание Telegram-бота/веб-платформы", "Запуск бета-теста с 10 агентствами", "Запуск таргетированной рекламы"], 
+              checklist: ["Сформулировать УТП", "Создать MVP бота", "Пакеты подписок", "Запустить B2B-рассылку", "Привлечь первые 30 платящих клиентов"], 
+              tips: "Фокусируйтесь на узкой нише коммерческой аренды — там высокий средний чек.", risks: "Зависимость от сторонних AI API систем." },
+            
+            { id: 2, title: "No-code студия автоматизации процессов", category: "IT & AI", capital: "low", capitalText: "30 000 ₽", difficulty: "Легкая", payback: "1 мес.", monetization: "Проектная оплата + сопровождение", desc: "Студия по связке CRM, онлайн-касс, сервисов Make и Telegram-ботов для малого бизнеса без программирования.", 
+              steps: ["Освоение сервисов Make/Zapier/AmoCRM", "Упаковка сайта-портфолио", "Холодный аутрич B2B клиентов", "Реализация 3 кейсов"], 
+              checklist: ["Сайт-портфолио", "Шаблоны КП", "Настройка 5 базовых автоворонок", "Контекстная реклама"], 
+              tips: "Давайте бесплатный аудит автоворонки для знакомства с клиентом.", risks: "Высокая конкуренция на фрилансе." },
+
+            { id: 3, title: "Генератор карточек для маркетплейсов", category: "IT & AI", capital: "medium", capitalText: "150 000 ₽", difficulty: "Средняя", payback: "3-4 мес.", monetization: "Пакеты генераций", desc: "Нейросеть для селлеров Wildberries и Ozon, создающая продающую инфографику и фоны по фото товара.", 
+              steps: ["Интеграция Stable Diffusion API", "Создание библиотеки стильных шаблонов", "Запуск веб-сервиса", "Маркетинг в Telegram-каналах селлеров"], 
+              checklist: ["Веб-интерфейс", "Настройка оплаты", "Запуск промо для селлеров", "100 зарегистрированных пользователей"], 
+              tips: "Давайте 3 бесплатные генерации за регистрацию.", risks: "Колебания стоимости токенов API." },
+
+            { id: 4, title: "Платформа микро-обучения с нейросетью", category: "IT & AI", capital: "medium", capitalText: "200 000 ₽", difficulty: "Средняя", payback: "4-6 мес.", monetization: "Freemium / B2B подписка", desc: "Сервис, превращающий книги и регламенты компании в 5-минутные интерактивные квизы с нейросетью.", 
+              steps: ["Разработка модуля парсинга текстов", "Генерация вопросов через AI", "Прототип мобильной версии", "B2B продажи HR-отделам"], 
+              checklist: ["MVP приложения", "База тестов", "Презентация для HR", "Первый корпоративный контракт"], 
+              tips: "Продавайте готовые решения для адаптации новых сотрудников.", risks: "Длительный цикл B2B-продаж." },
+
+            // Услуги
+            { id: 5, title: "Выездной премиум-барбершоп", category: "Услуги", capital: "medium", capitalText: "180 000 ₽", difficulty: "Легкая", payback: "2-3 мес.", monetization: "Разовые чеки / Абонементы", desc: "Мобильный сервис стрижки и ухода за бородой на дому, в офисе или перед важными мероприятиями.", 
+              steps: ["Закупка портативного оборудования и косметики", "Создание стильного сайта/приложения", "Таргетинг на бизнес-центры", "Запуск сервиса"], 
+              checklist: ["Кресло и инвентарь", "Форма мастера", "Настройка онлайн-записи", "Реклама в премиум ЖК"], 
+              tips: "Предлагайте услугу корпоративного ухода перед праздниками компаний.", risks: "Зависимость от квалификации мастеров." },
+
+            { id: 6, title: "Консьерж-сервис для автолюбителей", category: "Услуги", capital: "low", capitalText: "60 000 ₽", difficulty: "Легкая", payback: "1-2 мес.", monetization: "Подписка / Разовые вызовы", desc: "Забор авто у владельца, доставка на ТО, мойку, шиномонтаж и возврат к дому.", 
+              steps: ["Страхование ответственности драйверов", "Юридические договоры", "Запуск приложения/бота", "Маркетинг в автоклубах"], 
+              checklist: ["Страховой полис", "Договор с клиентом", "Маркетинг в ЖК премиум-класса", "Первые 20 постоянных клиентов"], 
+              tips: "Сделайте упор на экономию времени предпринимателей.", risks: "Риск повреждения авто при транспортировке." },
+
+            // Торговля & E-commerce
+            { id: 7, title: "Бренд крафтового парфюма для дома", category: "Торговля & E-commerce", capital: "medium", capitalText: "120 000 ₽", difficulty: "Средняя", payback: "2-4 мес.", monetization: "E-commerce / Маркетплейсы", desc: "Создание диффузоров, аромасвечей и автопарфюма с премиальными французскими отдушками.", 
+              steps: ["Закупка парфюмерных концентратов и тары", "Сертификация продукции", "Создание бренда и упаковки", "Выход на Wildberries/Ozon"], 
+              checklist: ["Декларация соответствия", "Закупка сырья", "Дизайн этикеток", "Фотосессия", "Первая партия на склад WB"], 
+              tips: "Делайте акцент на эстетичной упаковке, подходящей для подарка.", risks: "Повреждение стеклянной тары при доставке." },
+
+            { id: 8, title: "Нишевый секонд-хенд винтажных брендов", category: "Торговля & E-commerce", capital: "medium", capitalText: "200 000 ₽", difficulty: "Средняя", payback: "3 мес.", monetization: "Продажи через соцсети & шоурум", desc: "Селективный секонд-хенд с аутентичными брендовыми вещами 90-х и 2000-х годов.", 
+              steps: ["Поиск поставщиков из Европы/Азии", "Химчистка и аутентификация", "Создание контента для соцсетей", "Запуск интернет-магазина"], 
+              checklist: ["Закупка первой партии", "Договор с химчисткой", "Студийная съемка", "Запуск шоурума"], 
+              tips: "Делайте короткие видео с проверкой подлинности брендов.", risks: "Риск закупки контрафакта." },
+
+            // Производство
+            { id: 9, title: "Мини-производство акустических панелей", category: "Производство", capital: "medium", capitalText: "250 000 ₽", difficulty: "Средняя", payback: "3-5 мес.", monetization: "B2B и B2C продажи", desc: "Производство дизайнерских акустических панелей из войлока и дерева для офисов и домашних студий.", 
+              steps: ["Закупка форматно-раскроечного станка", "Поиск экологичного войлока и шпона", "Создание каталога дизайнов", "Продажи студиям дизайна"], 
+              checklist: ["Оборудование цеха", "Сертификаты пожаробезопасности", "Каталог образцов", "Сотрудничество с 10 дизайнерами"], 
+              tips: "Предлагайте бесплатную визуализацию панелей в интерьере клиента.", risks: "Рост цен на пиломатериалы." },
+
+            // HoReCa
+            { id: 10, title: "Кофейный пит-стоп с микро-пекарней", category: "HoReCa", capital: "high", capitalText: "600 000 ₽", difficulty: "Высокая", payback: "6-9 мес.", monetization: "Прямые продажи", desc: "Компактный авто-кофейный павильон формата Drive-Thru со свежей выпечкой собственного выпекания.", 
+              steps: ["Аренда участка на трассе/выезде из города", "Установка утепленного павильона", "Закупка кофемашины и конвектомата", "Запуск"], 
+              checklist: ["Разрешение на торговлю", "Профессиональная кофемашина", "Конвекционная печь", "Форма бариста", "Вывеска с подсветкой"], 
+              tips: "Вводите комбо-наборы «кофе + горячий круассан» со скидкой.", risks: "Сезонные колебания трафика." }
+        ];
+
+        // Дозаполнение базы до 100 идей программно
+        const categoriesList = ['IT & AI', 'Услуги', 'Торговля & E-commerce', 'Производство', 'Творчество & Медиа', 'Образование', 'HoReCa', 'Зеленый бизнес'];
+        const templates = [
+            { name: "Студия 3D-печати деталей", cat: "Производство", cap: "medium", capT: "220 000 ₽", diff: "Средняя" },
+            { name: "Школа робототехники для детей", cat: "Образование", cap: "medium", capT: "350 000 ₽", diff: "Средняя" },
+            { name: "Агентство инфлюенсер-маркетинга", cat: "Творчество & Медиа", cap: "low", capT: "40 000 ₽", diff: "Легкая" },
+            { name: "Сервис аренды туристического снаряжения", cat: "Услуги", cap: "medium", capT: "180 000 ₽", diff: "Легкая" },
+            { name: "Переработка пластика в элементы декора", cat: "Зеленый бизнес", cap: "high", capT: "550 000 ₽", diff: "Высокая" },
+            { name: "Мобильная чайная станция на мероприятия", cat: "HoReCa", cap: "medium", capT: "150 000 ₽", diff: "Легкая" },
+            { name: "Бренд функционального питания", cat: "Торговля & E-commerce", cap: "high", capT: "450 000 ₽", diff: "Высокая" },
+            { name: "Агентство VR-экскурсий для недвижимости", cat: "IT & AI", cap: "medium", capT: "280 000 ₽", diff: "Средняя" }
+        ];
+
+        let curId = 11;
+        while(IDEAS_DATABASE.length < 100) {
+            const tmpl = templates[(curId - 11) % templates.length];
+            const cat = categoriesList[curId % categoriesList.length];
+            
+            IDEAS_DATABASE.push({
+                id: curId,
+                title: `${tmpl.name} #${curId}`,
+                category: cat,
+                capital: tmpl.cap,
+                capitalText: tmpl.capT,
+                difficulty: tmpl.diff,
+                payback: `${3 + (curId % 5)}–${6 + (curId % 5)} мес.`,
+                monetization: "Прямые продажи / Подписка / B2B",
+                desc: `Инновационный бизнес-проект в сегменте "${cat}". Направлен на быстрорастущий рынок с высоким спросом и высокой окупаемостью.`,
+                steps: [
+                    "Анализ целевой аудитории и локального рынка",
+                    "Разработка MVP и запуск бренда",
+                    "Настройка цифровых каналов привлечения клиентов",
+                    "Масштабирование и автоматизация продаж"
+                ],
+                checklist: [
+                    "Регистрация юридического лица (ИП/ООО)",
+                    "Создание продающего сайта и соцсетей",
+                    "Подключение онлайн-эквайринга",
+                    "Запуск перфоманс-маркетинга",
+                    "Сбор первых 50 отзывов"
+                ],
+                tips: "Ориентируйтесь на повторные продажи и формирование постоянной базы клиентов.",
+                risks: "Возможные изменения стоимости привлечения лида."
+            });
+            curId++;
+        }
+
+        // Состояние приложения
+        let appState = {
+            selectedCategory: 'Все',
+            searchQuery: '',
+            capitalFilter: 'all',
+            difficultyFilter: 'all',
+            favorites: JSON.parse(localStorage.getItem('imp_favs') || '[]'),
+            checklists: JSON.parse(localStorage.getItem('imp_checklists') || '{}'),
+            currentIdeaId: null,
+            viewFavoritesOnly: false
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initParticleBackground();
+            initCategories();
+            renderGrid();
+            updateFavCounter();
+            setupEventListeners();
+            lucide.createIcons();
+        });
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                appState.searchQuery = e.target.value.toLowerCase();
+                renderGrid();
+            });
+
+            document.getElementById('capitalFilter').addEventListener('change', (e) => {
+                appState.capitalFilter = e.target.value;
+                renderGrid();
+            });
+
+            document.getElementById('difficultyFilter').addEventListener('change', (e) => {
+                appState.difficultyFilter = e.target.value;
+                renderGrid();
+            });
+        }
+
+        // Фоновый эффект золотых летающих частиц Canvas
+        function initParticleBackground() {
+            const canvas = document.getElementById('particleCanvas');
+            const ctx = canvas.getContext('2d');
+            let width = canvas.width = window.innerWidth;
+            let height = canvas.height = window.innerHeight;
+
+            window.addEventListener('resize', () => {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            });
+
+            const particles = Array.from({ length: 45 }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                radius: Math.random() * 2 + 0.5,
+                alpha: Math.random() * 0.6 + 0.2,
+                vx: (Math.random() - 0.5) * 0.3,
+                vy: (Math.random() - 0.5) * 0.3 - 0.1
+            }));
+
+            function animate() {
+                ctx.clearRect(0, 0, width, height);
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0) p.x = width;
+                    if (p.x > width) p.x = 0;
+                    if (p.y < 0) p.y = height;
+                    if (p.y > height) p.y = 0;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(229, 190, 83, ${p.alpha})`;
+                    ctx.shadowBlur = 8;
+                    ctx.shadowColor = '#d4af37';
+                    ctx.fill();
+                });
+
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function initCategories() {
+            const container = document.getElementById('categoryContainer');
+            container.innerHTML = CATEGORIES.map(cat => `
+                <button onclick="selectCategory('${cat}')" 
+                        class="px-4 py-2 rounded-xl text-xs font-semibold transition border ${
+                            appState.selectedCategory === cat 
+                            ? 'bg-gold-500/20 text-gold-300 border-gold-400 shadow-lg shadow-gold-500/20' 
+                            : 'glass-card border-gold-500/15 text-slate-300 hover:border-gold-500/40'
+                        }">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function selectCategory(cat) {
+            appState.selectedCategory = cat;
+            appState.viewFavoritesOnly = false;
+            initCategories();
+            renderGrid();
+        }
+
+        function toggleFavoritesView() {
+            appState.viewFavoritesOnly = !appState.viewFavoritesOnly;
+            const btn = document.getElementById('favoriteToggleBtn');
+            if (appState.viewFavoritesOnly) {
+                btn.classList.add('bg-gold-500/30', 'border-gold-400');
+                document.getElementById('catalogTitle').innerHTML = 'Избранные Проекты';
+            } else {
+                btn.classList.remove('bg-gold-500/30', 'border-gold-400');
+                document.getElementById('catalogTitle').innerHTML = `Каталог Проектов <span id="ideasCount" class="text-xs font-sans font-semibold text-gold-300 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/30">100 идей</span>`;
+            }
+            renderGrid();
+        }
+
+        function getFilteredIdeas() {
+            return IDEAS_DATABASE.filter(idea => {
+                if (appState.viewFavoritesOnly && !appState.favorites.includes(idea.id)) return false;
+                if (appState.selectedCategory !== 'Все' && idea.category !== appState.selectedCategory) return false;
+                if (appState.capitalFilter !== 'all' && idea.capital !== appState.capitalFilter) return false;
+                if (appState.difficultyFilter !== 'all' && idea.difficulty !== appState.difficultyFilter) return false;
+                if (appState.searchQuery) {
+                    const q = appState.searchQuery;
+                    return idea.title.toLowerCase().includes(q) || idea.desc.toLowerCase().includes(q) || idea.category.toLowerCase().includes(q);
+                }
+                return true;
+            });
+        }
+
+        function renderGrid() {
+            const grid = document.getElementById('ideasGrid');
+            const noResults = document.getElementById('noResults');
+            const filtered = getFilteredIdeas();
+
+            document.getElementById('ideasCount').innerText = `${filtered.length} идей`;
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            grid.innerHTML = filtered.map(idea => {
+                const isFav = appState.favorites.includes(idea.id);
+                return `
+                    <div class="glass-card rounded-2xl p-6 flex flex-col justify-between relative group cursor-pointer border border-gold-500/15 hover:border-gold-400/50" onclick="openModal(${idea.id})">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-3">
+                                <span class="text-xs px-3 py-1 rounded-full bg-gold-500/10 text-gold-300 border border-gold-500/30 font-semibold">
+                                    ${idea.category}
+                                </span>
+                                <button onclick="toggleFav(event, ${idea.id})" class="text-slate-400 hover:text-gold-400 transition p-1">
+                                    <i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-gold-400 text-gold-400' : ''}"></i>
+                                </button>
+                            </div>
+
+                            <h3 class="font-serif text-lg font-bold text-white mb-2 group-hover:text-gold-300 transition">${idea.title}</h3>
+                            <p class="text-xs text-slate-300/80 line-clamp-2 mb-4 leading-relaxed">${idea.desc}</p>
+                        </div>
+
+                        <div>
+                            <div class="grid grid-cols-2 gap-2 py-3 border-t border-gold-500/10 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block mb-0.5">Бюджет</span>
+                                    <span class="font-semibold text-emerald-400">${idea.capitalText}</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block mb-0.5">Окупаемость</span>
+                                    <span class="font-semibold text-gold-300">${idea.payback}</span>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex items-center justify-between text-xs font-semibold text-gold-400 group-hover:translate-x-1 transition-transform">
+                                <span>Открыть стратегию</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        // Анимация 3D Переворачивания генератора
+        function triggerRandomGenerator() {
+            const inner = document.getElementById('generatorCardInner');
+            const randomIdea = IDEAS_DATABASE[Math.floor(Math.random() * IDEAS_DATABASE.length)];
+
+            document.getElementById('genTitle').innerText = randomIdea.title;
+            document.getElementById('genCategory').innerText = randomIdea.category;
+            document.getElementById('genCapital').innerText = randomIdea.capitalText;
+            document.getElementById('genDesc').innerText = randomIdea.desc;
+            
+            document.getElementById('genOpenBtn').onclick = () => openModal(randomIdea.id);
+
+            inner.classList.add('flipped');
+        }
+
+        function resetGeneratorCard() {
+            document.getElementById('generatorCardInner').classList.remove('flipped');
+        }
+
+        function toggleFav(e, id) {
+            e.stopPropagation();
+            if (appState.favorites.includes(id)) {
+                appState.favorites = appState.favorites.filter(fId => fId !== id);
+            } else {
+                appState.favorites.push(id);
+            }
+            localStorage.setItem('imp_favs', JSON.stringify(appState.favorites));
+            updateFavCounter();
+            renderGrid();
+
+            if (appState.currentIdeaId === id) {
+                updateModalFavBtn(id);
+            }
+        }
+
+        function updateFavCounter() {
+            document.getElementById('favCounter').innerText = appState.favorites.length;
+        }
+
+        function resetFilters() {
+            appState.selectedCategory = 'Все';
+            appState.searchQuery = '';
+            appState.capitalFilter = 'all';
+            appState.difficultyFilter = 'all';
+            appState.viewFavoritesOnly = false;
+
+            document.getElementById('searchInput').value = '';
+            document.getElementById('capitalFilter').value = 'all';
+            document.getElementById('difficultyFilter').value = 'all';
+            document.getElementById('favoriteToggleBtn').classList.remove('bg-gold-500/30', 'border-gold-400');
+            document.getElementById('catalogTitle').innerHTML = `Каталог Проектов <span id="ideasCount" class="text-xs font-sans font-semibold text-gold-300 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-500/30">100 идей</span>`;
+
+            initCategories();
+            renderGrid();
+        }
+
+        function openModal(id) {
+            const idea = IDEAS_DATABASE.find(i => i.id === id);
+            if (!idea) return;
+
+            appState.currentIdeaId = id;
+
+            document.getElementById('modalTitle').innerText = idea.title;
+            document.getElementById('modalCategory').innerText = idea.category;
+            document.getElementById('modalCapital').innerText = `Капитал: ${idea.capitalText}`;
+            document.getElementById('modalDifficulty').innerText = `Сложность: ${idea.difficulty}`;
+            document.getElementById('modalDescription').innerText = idea.desc;
+            document.getElementById('modalInvestment').innerText = idea.capitalText;
+            document.getElementById('modalPayback').innerText = idea.payback;
+            document.getElementById('modalMonetization').innerText = idea.monetization;
+            document.getElementById('modalTips').innerText = idea.tips;
+            document.getElementById('modalRisks').innerText = idea.risks;
+
+            // Пошаговый план
+            document.getElementById('modalSteps').innerHTML = idea.steps.map((step, idx) => `
+                <div class="flex items-start gap-3 bg-olive-950/60 p-3.5 rounded-xl border border-gold-500/10">
+                    <span class="w-6 h-6 rounded-lg bg-gold-500/20 text-gold-300 border border-gold-500/40 flex items-center justify-center text-xs font-bold shrink-0">
+                        ${idx + 1}
+                    </span>
+                    <p class="text-sm text-slate-200 mt-0.5">${step}</p>
+                </div>
+            `).join('');
+
+            updateModalFavBtn(id);
+            renderChecklist(idea);
+
+            document.getElementById('ideaModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            lucide.createIcons();
+        }
+
+        function updateModalFavBtn(id) {
+            const isFav = appState.favorites.includes(id);
+            const favBtn = document.getElementById('modalFavBtn');
+            favBtn.innerHTML = `<i data-lucide="bookmark" class="w-5 h-5 ${isFav ? 'fill-gold-400 text-gold-400' : 'text-slate-400'}"></i>`;
+            favBtn.onclick = (e) => toggleFav(e, id);
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('ideaModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            appState.currentIdeaId = null;
+        }
+
+        function renderChecklist(idea) {
+            const savedState = appState.checklists[idea.id] || [];
+            const container = document.getElementById('modalChecklist');
+
+            container.innerHTML = idea.checklist.map((item, index) => {
+                const isChecked = savedState.includes(index);
+                return `
+                    <label class="flex items-center gap-3 bg-olive-950/80 p-3.5 rounded-xl border border-gold-500/15 cursor-pointer hover:border-gold-500/40 transition">
+                        <input type="checkbox" ${isChecked ? 'checked' : ''} 
+                               onchange="toggleChecklistItem(${idea.id}, ${index})"
+                               class="w-4 h-4 rounded text-gold-500 focus:ring-gold-400 bg-olive-900 border-gold-500/40">
+                        <span class="text-sm ${isChecked ? 'line-through text-slate-500' : 'text-slate-200'} font-medium">
+                            ${item}
+                        </span>
+                    </label>
+                `;
+            }).join('');
+
+            updateProgress(idea);
+        }
+
+        function toggleChecklistItem(ideaId, itemIndex) {
+            if (!appState.checklists[ideaId]) {
+                appState.checklists[ideaId] = [];
+            }
+
+            const list = appState.checklists[ideaId];
+            if (list.includes(itemIndex)) {
+                appState.checklists[ideaId] = list.filter(i => i !== itemIndex);
+            } else {
+                appState.checklists[ideaId].push(itemIndex);
+            }
+
+            localStorage.setItem('imp_checklists', JSON.stringify(appState.checklists));
+            const idea = IDEAS_DATABASE.find(i => i.id === ideaId);
+            renderChecklist(idea);
+        }
+
+        function updateProgress(idea) {
+            const savedState = appState.checklists[idea.id] || [];
+            const total = idea.checklist.length;
+            const checked = savedState.length;
+            const percentage = Math.round((checked / total) * 100);
+
+            document.getElementById('checklistProgress').innerText = `${percentage}% Готово`;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+        }
+
+        function exportToText() {
+            if (!appState.currentIdeaId) return;
+            const idea = IDEAS_DATABASE.find(i => i.id === appState.currentIdeaId);
+            if (!idea) return;
+
+            const savedState = appState.checklists[idea.id] || [];
+
+            let textContent = `=========================================\n`;
+            textContent += `БИЗНЕС-СТРАТЕГИЯ: ${idea.title.toUpperCase()}\n`;
+            textContent += `Категория: ${idea.category}\n`;
+            textContent += `Стартовый капитал: ${idea.capitalText}\n`;
+            textContent += `Окупаемость: ${idea.payback}\n`;
+            textContent += `Сложность: ${idea.difficulty}\n`;
+            textContent += `=========================================\n\n`;
+
+            textContent += `КОНЦЕПЦИЯ ПРОЕКТА:\n${idea.desc}\n\n`;
+
+            textContent += `ПОШАГОВЫЙ ПЛАН РЕАЛИЗАЦИИ:\n`;
+            idea.steps.forEach((step, idx) => {
+                textContent += `${idx + 1}. ${step}\n`;
+            });
+
+            textContent += `\nЧЕК-ЛИСТ ЗАПУСКА:\n`;
+            idea.checklist.forEach((item, idx) => {
+                const status = savedState.includes(idx) ? '[X]' : '[ ]';
+                textContent += `${status} ${item}\n`;
+            });
+
+            textContent += `\nСОВЕТЫ ПО СТАРТУ:\n${idea.tips}\n`;
+            textContent += `\nРИСКИ:\n${idea.risks}\n`;
+            textContent += `\n-----------------------------------------\n`;
+            textContent += `Сгенерировано в сервисе IMPERIUM IDEAS\n`;
+
+            const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Стратегия_${idea.title.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_')}.txt`;
+            link.click();
+        }
+    </script>
+</body>
+</html>

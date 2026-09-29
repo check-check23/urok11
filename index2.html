@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Конвертер величин</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        skybrand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                            950: '#082f49'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS for SVG Animations and Glassmorphic aesthetics -->
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 50%, #0284c7 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism styling */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Continuous Gear Rotation */
+        @keyframes spinSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes spinReverse {
+            from { transform: rotate(360deg); }
+            to { transform: rotate(0deg); }
+        }
+
+        .gear-spin {
+            animation: spinSlow 12s linear infinite;
+            transform-origin: center;
+        }
+        .gear-spin-reverse {
+            animation: spinReverse 8s linear infinite;
+            transform-origin: center;
+        }
+
+        /* Liquid Wave Effect for Volume Beaker */
+        @keyframes waveAnimation {
+            0% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(0%) translateY(-3px); }
+            100% { transform: translateX(-50%) translateY(0); }
+        }
+        .liquid-wave {
+            animation: waveAnimation 3s ease-in-out infinite;
+        }
+
+        /* Ruler Slide Animation */
+        @keyframes rulerSlide {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-15px); }
+            100% { transform: translateX(0); }
+        }
+        .ruler-anim {
+            animation: rulerSlide 4s ease-in-out infinite;
+        }
+
+        /* Thermometer Liquid Transition */
+        .mercury-level {
+            transition: height 0.5s ease-out, y 0.5s ease-out;
+        }
+
+        /* Custom input number styling remove spinners */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+
+        /* Prevent text/content overflow inside dropdown options */
+        select option {
+            background-color: #0c4a6e;
+            color: #ffffff;
+            padding: 8px;
+        }
+    </style>
+</head>
+<body class="p-3 sm:p-6 md:p-8 flex items-center justify-center min-h-screen">
+
+    <!-- MAIN CONTAINER -->
+    <div class="w-full max-w-4xl glass-card rounded-3xl shadow-2xl overflow-hidden border border-white/30 flex flex-col my-auto max-w-full">
+        
+        <!-- HEADER WITH GEAR ANIMATIONS -->
+        <header class="bg-gradient-to-r from-skybrand-900 via-skybrand-800 to-skybrand-900 text-white p-5 sm:p-8 relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
+            
+            <!-- Floating Decorative Gears in Header SVG -->
+            <div class="absolute right-3 -bottom-6 opacity-20 pointer-events-none">
+                <svg width="180" height="180" viewBox="0 0 100 100">
+                    <path class="gear-spin" fill="#38bdf8" d="M50,32.5 C40.3,32.5 32.5,40.3 32.5,50 C32.5,59.7 40.3,67.5 50,67.5 C59.7,67.5 67.5,59.7 67.5,50 C67.5,40.3 59.7,32.5 50,32.5 Z M50,60 C44.5,60 40,55.5 40,50 C40,44.5 44.5,40 50,40 C55.5,40 60,44.5 60,50 C60,55.5 55.5,60 50,60 Z M94.1,44.7 L84.1,43.1 C83.2,39.6 81.8,36.3 79.9,33.3 L86.3,25.5 C87.4,24.2 87.2,22.2 86,21.1 L78.9,14 C77.8,12.8 75.8,12.6 74.5,13.7 L66.7,20.1 C63.7,18.2 60.4,16.8 56.9,15.9 L55.3,5.9 C55.1,4.3 53.7,3.1 52.1,3.1 L42.1,3.1 C40.5,3.1 39.1,4.3 38.9,5.9 L37.3,15.9 C33.8,16.8 30.5,18.2 27.5,20.1 L19.7,13.7 C18.4,12.6 16.4,12.8 15.3,14 L8.2,21.1 C7,22.2 6.8,24.2 7.9,25.5 L14.3,33.3 C12.4,36.3 11,39.6 10.1,43.1 L0.1,44.7 C-0.1,46.3 -0.1,47.9 -0.1,49.5 C-0.1,51.1 0.1,52.7 0.1,54.3 L10.1,55.9 C11,59.4 12.4,62.7 14.3,65.7 L7.9,73.5 C6.8,74.8 7,76.8 8.2,77.9 L15.3,85 C16.4,86.2 18.4,86.4 19.7,85.3 L27.5,78.9 C30.5,80.8 33.8,82.2 37.3,83.1 L38.9,93.1 C39.1,94.7 40.5,95.9 42.1,95.9 L52.1,95.9 C53.7,95.9 55.1,94.7 55.3,93.1 L56.9,83.1 C60.4,82.2 63.7,80.8 66.7,78.9 L74.5,85.3 C75.8,86.4 77.8,86.2 78.9,85 L86,77.9 C87.2,76.8 87.4,74.8 86.3,73.5 L79.9,65.7 C81.8,62.7 83.2,59.4 84.1,55.9 L94.1,54.3 C95.7,54.1 96.9,52.7 96.9,51.1 L96.9,47.9 C96.9,46.3 95.7,44.9 94.1,44.7 Z"/>
+                </svg>
+            </div>
+            <div class="absolute left-1/3 -top-10 opacity-15 pointer-events-none">
+                <svg width="120" height="120" viewBox="0 0 100 100">
+                    <path class="gear-spin-reverse" fill="#7dd3fc" d="M50,32.5 C40.3,32.5 32.5,40.3 32.5,50 C32.5,59.7 40.3,67.5 50,67.5 C59.7,67.5 67.5,59.7 67.5,50 C67.5,40.3 59.7,32.5 50,32.5 Z M94.1,44.7 L84.1,43.1 C83.2,39.6 81.8,36.3 79.9,33.3 L86.3,25.5 C87.4,24.2 87.2,22.2 86,21.1 L78.9,14 C77.8,12.8 75.8,12.6 74.5,13.7 L66.7,20.1 C63.7,18.2 60.4,16.8 56.9,15.9 L55.3,5.9 C55.1,4.3 53.7,3.1 52.1,3.1 L42.1,3.1 C40.5,3.1 39.1,4.3 38.9,5.9 L37.3,15.9 C33.8,16.8 30.5,18.2 27.5,20.1 L19.7,13.7 C18.4,12.6 16.4,12.8 15.3,14 L8.2,21.1 C7,22.2 6.8,24.2 7.9,25.5 L14.3,33.3 C12.4,36.3 11,39.6 10.1,43.1 L0.1,44.7 C-0.1,46.3 -0.1,47.9 -0.1,49.5 C-0.1,51.1 0.1,52.7 0.1,54.3 L10.1,55.9 C11,59.4 12.4,62.7 14.3,65.7 L7.9,73.5 C6.8,74.8 7,76.8 8.2,77.9 L15.3,85 C16.4,86.2 18.4,86.4 19.7,85.3 L27.5,78.9 C30.5,80.8 33.8,82.2 37.3,83.1 L38.9,93.1 C39.1,94.7 40.5,95.9 42.1,95.9 L52.1,95.9 C53.7,95.9 55.1,94.7 55.3,93.1 L56.9,83.1 C60.4,82.2 63.7,80.8 66.7,78.9 L74.5,85.3 C75.8,86.4 77.8,86.2 78.9,85 L86,77.9 C87.2,76.8 87.4,74.8 86.3,73.5 L79.9,65.7 C81.8,62.7 83.2,59.4 84.1,55.9 L94.1,54.3 C95.7,54.1 96.9,52.7 96.9,51.1 L96.9,47.9 C96.9,46.3 95.7,44.9 94.1,44.7 Z"/>
+                </svg>
+            </div>
+
+            <div class="z-10 text-center sm:text-left">
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center justify-center sm:justify-start gap-3">
+                    <span class="p-2 bg-skybrand-600/50 rounded-2xl border border-skybrand-400/30 shadow-inner">⚡</span>
+                    Конвертер величин
+                </h1>
+                <p class="text-skybrand-200 text-xs sm:text-sm mt-1 font-medium">
+                    Мгновенный и точный пересчет физических показателей
+                </p>
+            </div>
+
+            <div class="z-10 bg-skybrand-950/60 px-4 py-2 rounded-2xl border border-skybrand-500/30 text-xs text-skybrand-300 font-mono tracking-wider max-w-full text-center">
+                Ввод ➔ Точный расчет
+            </div>
+        </header>
+
+        <!-- CATEGORY TABS -->
+        <div class="p-3 sm:p-6 bg-skybrand-50/60 border-b border-skybrand-100">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3" id="category-tabs">
+                <!-- Length Tab -->
+                <button data-category="length" class="category-btn active bg-skybrand-600 text-white shadow-md shadow-skybrand-600/30 p-2.5 sm:p-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 truncate">
+                    <span class="text-base sm:text-lg">📏</span> <span class="truncate">Длина</span>
+                </button>
+                <!-- Weight Tab -->
+                <button data-category="weight" class="category-btn bg-white text-skybrand-800 hover:bg-skybrand-100 border border-skybrand-200/80 p-2.5 sm:p-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 truncate">
+                    <span class="text-base sm:text-lg">⚖️</span> <span class="truncate">Вес</span>
+                </button>
+                <!-- Temperature Tab -->
+                <button data-category="temperature" class="category-btn bg-white text-skybrand-800 hover:bg-skybrand-100 border border-skybrand-200/80 p-2.5 sm:p-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 truncate">
+                    <span class="text-base sm:text-lg">🌡️</span> <span class="truncate">Температура</span>
+                </button>
+                <!-- Volume Tab -->
+                <button data-category="volume" class="category-btn bg-white text-skybrand-800 hover:bg-skybrand-100 border border-skybrand-200/80 p-2.5 sm:p-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 truncate">
+                    <span class="text-base sm:text-lg">🧪</span> <span class="truncate">Объем</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- MAIN CONVERSION PANEL -->
+        <div class="p-4 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center w-full max-w-full">
+            
+            <!-- LEFT COLUMN: INPUTS AND CONTROLS (7 COLS) -->
+            <div class="md:col-span-7 space-y-5 w-full min-w-0">
+                
+                <!-- ERROR / WARNING TOAST -->
+                <div id="error-box" class="hidden p-4 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-xs sm:text-sm font-medium flex items-center gap-3 animate-bounce max-w-full">
+                    <span class="text-lg flex-shrink-0">⚠️</span>
+                    <span id="error-message" class="break-words">Ошибка ввода</span>
+                </div>
+
+                <!-- INPUT SECTION -->
+                <div class="bg-white p-4 sm:p-5 rounded-2xl border border-skybrand-100 shadow-sm space-y-3 w-full max-w-full overflow-hidden">
+                    <label class="block text-xs font-bold text-skybrand-800 uppercase tracking-wider">Исходная величина</label>
+                    <div class="flex flex-col lg:flex-row gap-3 w-full">
+                        <input type="number" id="input-value" value="1" placeholder="Введите число..." 
+                            class="w-full lg:w-1/2 px-4 py-3 text-lg font-bold text-skybrand-950 bg-skybrand-50/50 rounded-xl border border-skybrand-200 focus:outline-none focus:ring-2 focus:ring-skybrand-500 focus:bg-white transition-all min-w-0">
+                        
+                        <select id="from-unit" class="w-full lg:w-1/2 px-3 py-3 bg-skybrand-50 text-skybrand-900 font-semibold rounded-xl border border-skybrand-200 focus:outline-none focus:ring-2 focus:ring-skybrand-500 cursor-pointer text-sm truncate min-w-0">
+                            <!-- Options injected dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- SWAP BUTTON -->
+                <div class="flex justify-center -my-1">
+                    <button id="swap-btn" title="Поменять местами" class="p-3 bg-skybrand-500 hover:bg-skybrand-600 active:scale-90 text-white rounded-full shadow-md shadow-skybrand-500/40 transition-all flex-shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- OUTPUT SECTION -->
+                <div class="bg-skybrand-900 text-white p-4 sm:p-5 rounded-2xl border border-skybrand-700 shadow-inner space-y-3 w-full max-w-full overflow-hidden">
+                    <label class="block text-xs font-bold text-skybrand-300 uppercase tracking-wider">Результат конвертации</label>
+                    <div class="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center w-full">
+                        <div id="output-value" class="w-full lg:w-1/2 px-4 py-3 text-xl sm:text-2xl font-extrabold text-skybrand-200 bg-skybrand-950/60 rounded-xl border border-skybrand-800 break-all overflow-x-auto min-h-[52px] flex items-center min-w-0">
+                            1000
+                        </div>
+                        
+                        <select id="to-unit" class="w-full lg:w-1/2 px-3 py-3 bg-skybrand-800 text-white font-semibold rounded-xl border border-skybrand-700 focus:outline-none focus:ring-2 focus:ring-skybrand-400 cursor-pointer text-sm truncate min-w-0">
+                            <!-- Options injected dynamically -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- FORMULA FOOTER -->
+                <div class="text-center sm:text-left text-xs font-medium text-skybrand-700 bg-skybrand-100/50 p-3 rounded-xl border border-skybrand-200/60 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-full">
+                    <span>💡 Коэффициент / Формула:</span>
+                    <span id="formula-text" class="font-mono text-skybrand-900 font-bold truncate max-w-full">1 м = 1000 мм</span>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: ANIMATED GRAPHICS DISPLAY (5 COLS) -->
+            <div class="md:col-span-5 bg-gradient-to-br from-skybrand-100 to-skybrand-200/70 p-6 rounded-2xl border border-skybrand-200 flex flex-col items-center justify-center min-h-[260px] relative overflow-hidden shadow-inner w-full max-w-full">
+                
+                <span class="text-xs font-bold text-skybrand-800 uppercase tracking-wider mb-2">Интерактивный визуал</span>
+
+                <!-- 1. RULER SVG ANIMATION (Length) -->
+                <div id="visual-length" class="visual-wrapper flex flex-col items-center justify-center space-y-3 w-full">
+                    <svg class="w-48 h-24 max-w-full" viewBox="0 0 200 80">
+                        <!-- Ruler Base -->
+                        <rect x="10" y="25" width="180" height="40" rx="6" fill="#0284c7" stroke="#0369a1" stroke-width="2"/>
+                        <!-- Moving Ruler Markings -->
+                        <g class="ruler-anim" fill="none" stroke="#ffffff" stroke-width="2">
+                            <line x1="20" y1="25" x2="20" y2="45" />
+                            <line x1="30" y1="25" x2="30" y2="35" />
+                            <line x1="40" y1="25" x2="40" y2="35" />
+                            <line x1="50" y1="25" x2="50" y2="35" />
+                            <line x1="60" y1="25" x2="60" y2="45" />
+                            <line x1="70" y1="25" x2="70" y2="35" />
+                            <line x1="80" y1="25" x2="80" y2="35" />
+                            <line x1="90" y1="25" x2="90" y2="35" />
+                            <line x1="100" y1="25" x2="100" y2="45" />
+                            <line x1="110" y1="25" x2="110" y2="35" />
+                            <line x1="120" y1="25" x2="120" y2="35" />
+                            <line x1="130" y1="25" x2="130" y2="35" />
+                            <line x1="140" y1="25" x2="140" y2="45" />
+                            <line x1="150" y1="25" x2="150" y2="35" />
+                            <line x1="160" y1="25" x2="160" y2="35" />
+                            <line x1="170" y1="25" x2="170" y2="35" />
+                            <line x1="180" y1="25" x2="180" y2="45" />
+                        </g>
+                    </svg>
+                    <p class="text-xs text-skybrand-900 font-medium text-center">Измерение дистанций и протяженностей</p>
+                </div>
+
+                <!-- 2. BALANCE SCALES SVG (Weight) -->
+                <div id="visual-weight" class="visual-wrapper hidden flex flex-col items-center justify-center space-y-3 w-full">
+                    <svg class="w-48 h-28 max-w-full" viewBox="0 0 200 110">
+                        <!-- Scale Base -->
+                        <path d="M70,100 L130,100 L115,85 L85,85 Z" fill="#075985" />
+                        <rect x="95" y="25" width="10" height="60" fill="#0369a1" />
+                        
+                        <!-- Rotating Beam -->
+                        <g class="transition-transform duration-700 origin-center" id="scale-beam" style="transform-origin: 100px 30px;">
+                            <rect x="30" y="27" width="140" height="6" rx="3" fill="#0ea5e9" />
+                            <!-- Left Plate -->
+                            <line x1="40" y1="30" x2="25" y2="65" stroke="#0284c7" stroke-width="2"/>
+                            <line x1="40" y1="30" x2="55" y2="65" stroke="#0284c7" stroke-width="2"/>
+                            <path d="M20,65 Q40,75 60,65 Z" fill="#38bdf8" />
+                            <!-- Right Plate -->
+                            <line x1="160" y1="30" x2="145" y2="65" stroke="#0284c7" stroke-width="2"/>
+                            <line x1="160" y1="30" x2="175" y2="65" stroke="#0284c7" stroke-width="2"/>
+                            <path d="M140,65 Q160,75 180,65 Z" fill="#38bdf8" />
+                        </g>
+                    </svg>
+                    <p class="text-xs text-skybrand-900 font-medium text-center">Баланс масс и весовых категорий</p>
+                </div>
+
+                <!-- 3. THERMOMETER SVG (Temperature) -->
+                <div id="visual-temperature" class="visual-wrapper hidden flex flex-col items-center justify-center space-y-2 w-full">
+                    <svg class="w-24 h-32 max-w-full" viewBox="0 0 80 120">
+                        <!-- Glass Tube -->
+                        <rect x="33" y="10" width="14" height="80" rx="7" fill="#ffffff" stroke="#0284c7" stroke-width="3"/>
+                        <!-- Bulb -->
+                        <circle cx="40" cy="95" r="16" fill="#ef4444" stroke="#0284c7" stroke-width="3"/>
+                        <!-- Dynamic Mercury Level -->
+                        <rect id="thermo-mercury" class="mercury-level" x="36" y="50" width="8" height="40" fill="#ef4444" rx="3"/>
+                        <!-- Scale notches -->
+                        <line x1="50" y1="20" x2="56" y2="20" stroke="#0369a1" stroke-width="2"/>
+                        <line x1="50" y1="35" x2="56" y2="35" stroke="#0369a1" stroke-width="2"/>
+                        <line x1="50" y1="50" x2="56" y2="50" stroke="#0369a1" stroke-width="2"/>
+                        <line x1="50" y1="65" x2="56" y2="65" stroke="#0369a1" stroke-width="2"/>
+                    </svg>
+                    <p class="text-xs text-skybrand-900 font-medium text-center">Шкалы температурного состояния</p>
+                </div>
+
+                <!-- 4. BEAKER / FLASK SVG (Volume) -->
+                <div id="visual-volume" class="visual-wrapper hidden flex flex-col items-center justify-center space-y-2 w-full">
+                    <svg class="w-28 h-32 max-w-full" viewBox="0 0 100 120">
+                        <defs>
+                            <clipPath id="flask-clip">
+                                <path d="M35,15 L65,15 L65,35 L85,90 Q90,105 75,105 L25,105 Q10,105 15,90 L35,35 Z"/>
+                            </clipPath>
+                        </defs>
+                        <!-- Flask Glass Outer -->
+                        <path d="M35,15 L65,15 L65,35 L85,90 Q90,105 75,105 L25,105 Q10,105 15,90 L35,35 Z" fill="#ffffff" stroke="#0284c7" stroke-width="3.5" />
+                        <!-- Liquid Inside Clip -->
+                        <g clip-path="url(#flask-clip)">
+                            <rect id="beaker-liquid" class="transition-all duration-500" x="0" y="55" width="100" height="60" fill="#38bdf8" opacity="0.85" />
+                            <!-- Floating Wave -->
+                            <path class="liquid-wave" d="M0,55 Q25,50 50,55 T100,55 L100,110 L0,110 Z" fill="#0284c7" opacity="0.4"/>
+                        </g>
+                        <!-- Flask Lip -->
+                        <rect x="30" y="10" width="40" height="5" rx="2" fill="#0284c7"/>
+                    </svg>
+                    <p class="text-xs text-skybrand-900 font-medium text-center">Объем жидкостей и емкостей</p>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- FOOTER -->
+        <footer class="bg-skybrand-50/80 p-4 border-t border-skybrand-100 text-center text-xs text-skybrand-700 font-medium">
+            Универсальный калькулятор • Автоматическое сохранение параметров в сессии
+        </footer>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // DATA UNITS & CONVERSION FACTORS (BASE UNITS: Meter, Gram, Celsius, Liter)
+        const UNIT_DATA = {
+            length: {
+                name: 'Длина',
+                base: 'm',
+                units: {
+                    mm: { name: 'Миллиметры (мм)', factor: 0.001 },
+                    cm: { name: 'Сантиметры (см)', factor: 0.01 },
+                    m: { name: 'Метры (м)', factor: 1 },
+                    km: { name: 'Километры (км)', factor: 1000 },
+                    in: { name: 'Дюймы (in)', factor: 0.0254 },
+                    ft: { name: 'Футы (ft)', factor: 0.3048 },
+                    yd: { name: 'Ярды (yd)', factor: 0.9144 },
+                    mi: { name: 'Мили (mi)', factor: 1609.344 }
+                },
+                allowNegative: false
+            },
+            weight: {
+                name: 'Вес / Масса',
+                base: 'g',
+                units: {
+                    mg: { name: 'Миллиграммы (мг)', factor: 0.001 },
+                    g: { name: 'Граммы (г)', factor: 1 },
+                    kg: { name: 'Килограммы (кг)', factor: 1000 },
+                    t: { name: 'Тонны (т)', factor: 1000000 },
+                    oz: { name: 'Унции (oz)', factor: 28.349523125 },
+                    lb: { name: 'Фунты (lb)', factor: 453.59237 }
+                },
+                allowNegative: false
+            },
+            temperature: {
+                name: 'Температура',
+                units: {
+                    C: { name: 'Градусы Цельсия (°C)' },
+                    F: { name: 'Градусы Фаренгейта (°F)' },
+                    K: { name: 'Кельвины (K)' }
+                },
+                allowNegative: true
+            },
+            volume: {
+                name: 'Объем',
+                base: 'l',
+                units: {
+                    ml: { name: 'Миллилитры (мл)', factor: 0.001 },
+                    l: { name: 'Литры (л)', factor: 1 },
+                    m3: { name: 'Кубические метры (м³)', factor: 1000 },
+                    gal: { name: 'Галлоны США (gal)', factor: 3.78541 },
+                    floz: { name: 'Жидкие унции (fl oz)', factor: 0.0295735 }
+                },
+                allowNegative: false
+            }
+        };
+
+        // CURRENT APP STATE
+        let currentCategory = 'length';
+
+        // DOM ELEMENTS
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const inputValue = document.getElementById('input-value');
+        const outputValue = document.getElementById('output-value');
+        const fromUnitSelect = document.getElementById('from-unit');
+        const toUnitSelect = document.getElementById('to-unit');
+        const swapBtn = document.getElementById('swap-btn');
+        const errorBox = document.getElementById('error-box');
+        const errorMessage = document.getElementById('error-message');
+        const formulaText = document.getElementById('formula-text');
+
+        // Visual Graphic Elements
+        const visualWrappers = {
+            length: document.getElementById('visual-length'),
+            weight: document.getElementById('visual-weight'),
+            temperature: document.getElementById('visual-temperature'),
+            volume: document.getElementById('visual-volume')
+        };
+        const scaleBeam = document.getElementById('scale-beam');
+        const thermoMercury = document.getElementById('thermo-mercury');
+        const beakerLiquid = document.getElementById('beaker-liquid');
+
+        // POPULATE SELECT DROPDOWNS
+        function populateUnits(category) {
+            const units = UNIT_DATA[category].units;
+            fromUnitSelect.innerHTML = '';
+            toUnitSelect.innerHTML = '';
+
+            const keys = Object.keys(units);
+            keys.forEach((key, index) => {
+                const opt1 = document.createElement('option');
+                opt1.value = key;
+                opt1.textContent = units[key].name;
+                fromUnitSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = key;
+                opt2.textContent = units[key].name;
+                toUnitSelect.appendChild(opt2);
+            });
+
+            // Set default secondary unit to second option if exists
+            if (keys.length > 1) {
+                toUnitSelect.selectedIndex = 1;
+            }
+        }
+
+        // SWITCH CATEGORY
+        function setCategory(category) {
+            currentCategory = category;
+
+            // Update Tabs Style
+            categoryBtns.forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.className = "category-btn active bg-skybrand-600 text-white shadow-md shadow-skybrand-600/30 p-2.5 sm:p-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 truncate";
+                } else {
+                    btn.className = "category-btn bg-white text-skybrand-800 hover:bg-skybrand-100 border border-skybrand-200/80 p-2.5 sm:p-4 rounded-2xl font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 truncate";
+                }
+            });
+
+            // Toggle Visual Panels
+            Object.keys(visualWrappers).forEach(cat => {
+                if (cat === category) {
+                    visualWrappers[cat].classList.remove('hidden');
+                } else {
+                    visualWrappers[cat].classList.add('hidden');
+                }
+            });
+
+            populateUnits(category);
+            calculate();
+        }
+
+        // TEMPERATURE CONVERSION LOGIC
+        function convertTemperature(value, from, to) {
+            let celsius;
+            // First convert to Celsius
+            if (from === 'C') celsius = value;
+            else if (from === 'F') celsius = (value - 32) * 5 / 9;
+            else if (from === 'K') celsius = value - 273.15;
+
+            // Check physical absolute zero constraint (-273.15 °C)
+            if (celsius < -273.15) {
+                return { error: "Температура ниже абсолютного нуля (-273.15 °C) невозможна!" };
+            }
+
+            // Convert Celsius to Target
+            let result;
+            if (to === 'C') result = celsius;
+            else if (to === 'F') result = (celsius * 9 / 5) + 32;
+            else if (to === 'K') result = celsius + 273.15;
+
+            return { result };
+        }
+
+        // GENERAL CONVERSION LOGIC
+        function calculate() {
+            hideError();
+            const valStr = inputValue.value.trim();
+
+            if (valStr === '') {
+                outputValue.textContent = '—';
+                formulaText.textContent = 'Введите число';
+                return;
+            }
+
+            const val = parseFloat(valStr);
+
+            // Validation 1: Is a valid number
+            if (isNaN(val)) {
+                showError('Пожалуйста, введите корректное число');
+                outputValue.textContent = 'Ошибка';
+                return;
+            }
+
+            const catConfig = UNIT_DATA[currentCategory];
+            const fromKey = fromUnitSelect.value;
+            const toKey = toUnitSelect.value;
+
+            // Validation 2: Negative values for non-negative categories
+            if (!catConfig.allowNegative && val < 0) {
+                showError(`Категория "${catConfig.name}" не может содержать отрицательные значения!`);
+                outputValue.textContent = 'Неверно';
+                return;
+            }
+
+            let resultVal = 0;
+
+            if (currentCategory === 'temperature') {
+                const tempRes = convertTemperature(val, fromKey, toKey);
+                if (tempRes.error) {
+                    showError(tempRes.error);
+                    outputValue.textContent = 'Ошибка';
+                    return;
+                }
+                resultVal = tempRes.result;
+                formulaText.textContent = `${val} °${fromKey} ➔ ${formatNumber(resultVal)} °${toKey}`;
+                updateThermoVisual(val, fromKey);
+            } else {
+                // Standard multiplicative conversion
+                const fromFactor = catConfig.units[fromKey].factor;
+                const toFactor = catConfig.units[toKey].factor;
+
+                // Base value = value * fromFactor
+                const baseVal = val * fromFactor;
+                resultVal = baseVal / toFactor;
+
+                // Formula description
+                const ratio = fromFactor / toFactor;
+                formulaText.textContent = `1 ${fromKey} = ${formatNumber(ratio)} ${toKey}`;
+
+                // Update non-temp visuals
+                updateOtherVisuals(val, resultVal);
+            }
+
+            outputValue.textContent = formatNumber(resultVal);
+        }
+
+        // NUMBER FORMATTER (Clean decimals)
+        function formatNumber(num) {
+            if (Math.abs(num) < 0.000001 && num !== 0) {
+                return num.toExponential(4);
+            }
+            return parseFloat(num.toFixed(6)).toLocaleString('ru-RU', { maximumFractionDigits: 6 });
+        }
+
+        // ERROR HANDLING DISPLAY
+        function showError(msg) {
+            errorMessage.textContent = msg;
+            errorBox.classList.remove('hidden');
+        }
+
+        function hideError() {
+            errorBox.classList.add('hidden');
+        }
+
+        // DYNAMIC ANIMATED GRAPHICS UPDATERS
+        function updateThermoVisual(val, unit) {
+            let celsius = val;
+            if (unit === 'F') celsius = (val - 32) * 5 / 9;
+            if (unit === 'K') celsius = val - 273.15;
+
+            // Clamp Mercury visual height between y=15 (hot) and y=80 (cold)
+            let clamped = Math.max(-30, Math.min(100, celsius));
+            let heightPercent = (clamped + 30) / 130; // 0 to 1
+            let yPos = 80 - (heightPercent * 65);
+            let heightVal = 95 - yPos;
+
+            thermoMercury.setAttribute('y', yPos);
+            thermoMercury.setAttribute('height', heightVal);
+        }
+
+        function updateOtherVisuals(inputVal, resultVal) {
+            if (currentCategory === 'weight') {
+                // Tilt balance scales depending on value magnitude
+                let tilt = 0;
+                if (inputVal > 0) {
+                    tilt = Math.min(15, Math.max(-15, Math.log10(inputVal + 1) * 5));
+                }
+                scaleBeam.style.transform = `rotate(${tilt}deg)`;
+            } else if (currentCategory === 'volume') {
+                // Change beaker fill level
+                let fill = Math.min(85, Math.max(15, (inputVal % 100)));
+                beakerLiquid.setAttribute('y', 105 - fill);
+            }
+        }
+
+        // EVENT LISTENERS
+        categoryBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                setCategory(btn.dataset.category);
+            });
+        });
+
+        // Instant calculations on typing and changing selects
+        inputValue.addEventListener('input', calculate);
+        fromUnitSelect.addEventListener('change', calculate);
+        toUnitSelect.addEventListener('change', calculate);
+
+        // Swap functionality
+        swapBtn.addEventListener('click', () => {
+            const temp = fromUnitSelect.value;
+            fromUnitSelect.value = toUnitSelect.value;
+            toUnitSelect.value = temp;
+            calculate();
+        });
+
+        // INITIALIZE APP
+        setCategory('length');
+    </script>
+</body>
+</html>

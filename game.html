@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Битва Знаний: Победи Монстра</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@400;700&family=Press+Start+2P&family=Yuji+Boku&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Comfortaa', cursive, sans-serif;
+            background: radial-gradient(circle at center, #2a083b, #12031e, #05000a);
+            color: #f1e4ff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Neon Glow Effects */
+        .neon-border-pink {
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5), inset 0 0 10px rgba(236, 72, 153, 0.3);
+            border: 2px solid #ec4899;
+        }
+
+        .neon-border-purple {
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.5), inset 0 0 10px rgba(168, 85, 247, 0.3);
+            border: 2px solid #a855f7;
+        }
+
+        .neon-text-pink {
+            text-shadow: 0 0 8px #ec4899, 0 0 20px #be185d;
+        }
+
+        .neon-text-purple {
+            text-shadow: 0 0 8px #a855f7, 0 0 20px #6b21a8;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        /* SVG Monster Animations */
+        @keyframes floatMonster {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(1deg); }
+        }
+
+        @keyframes monsterEyeRoll {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(3px, -3px); }
+            50% { transform: translate(-3px, 2px); }
+            75% { transform: translate(2px, 3px); }
+        }
+
+        @keyframes monsterLaugh {
+            0%, 100% { transform: scale(1); }
+            20% { transform: scale(1.08) translateY(-5px); }
+            40% { transform: scale(0.95) translateY(3px); }
+            60% { transform: scale(1.06) translateY(-4px); }
+            80% { transform: scale(0.98) translateY(1px); }
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(236, 72, 153, 0.6)); }
+            50% { filter: drop-shadow(0 0 20px rgba(236, 72, 153, 1)); }
+        }
+
+        .monster-container {
+            animation: floatMonster 4s infinite ease-in-out;
+        }
+
+        .monster-eye-pupil {
+            animation: monsterEyeRoll 6s infinite ease-in-out;
+        }
+
+        .monster-laughing {
+            animation: monsterLaugh 0.5s ease-in-out 3 !important;
+        }
+
+        .monster-glowing {
+            animation: glowPulse 2s infinite ease-in-out;
+        }
+
+        /* Battle Animations */
+        @keyframes playerAttack {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(80px) scale(1.1); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes monsterAttack {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-80px) scale(1.15); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes shakeScreen {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-8px, 5px); }
+            40% { transform: translate(8px, -5px); }
+            60% { transform: translate(-5px, -5px); }
+            80% { transform: translate(5px, 5px); }
+        }
+
+        .animate-player-attack {
+            animation: playerAttack 0.4s ease-in-out;
+        }
+
+        .animate-monster-attack {
+            animation: monsterAttack 0.4s ease-in-out;
+        }
+
+        .animate-shake {
+            animation: shakeScreen 0.4s ease-in-out;
+        }
+
+        /* Floating Damage Text */
+        @keyframes damageFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            50% { transform: translateY(-40px) scale(1.4); }
+            100% { opacity: 0; transform: translateY(-70px) scale(0.8); }
+        }
+
+        .damage-popup {
+            position: absolute;
+            animation: damageFloat 1s ease-out forwards;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Health Bar Transitions */
+        .hp-bar-fill {
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #12031e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #8b5cf6;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between relative overflow-hidden">
+
+    <div class="fixed top-4 right-4 z-50 flex items-center gap-3">
+        <button id="sound-toggle" class="bg-purple-900/80 hover:bg-purple-700 text-pink-300 p-3 rounded-full neon-border-pink transition duration-200 backdrop-blur-md">
+            <i id="sound-icon" class="fas fa-volume-up text-xl"></i>
+        </button>
+    </div>
+
+    <!-- Background glowing ambient Orbs -->
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -right-32 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="container mx-auto px-4 py-6 flex-grow flex flex-col justify-center items-center relative z-10">
+
+        <!-- SCREEN 1: SUBJECT SELECTION -->
+        <section id="select-screen" class="w-full max-w-4xl text-center space-y-8 animate-fade-in">
+            <div class="space-y-3">
+                <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-400 to-indigo-400 neon-text-pink py-2">
+                    БИТВА ЗНАНИЙ
+                </h1>
+                <p class="text-purple-200 text-lg md:text-xl max-w-2xl mx-auto">
+                    Выберите школьный предмет, сразитесь с древним монстром и докажите силу своего разума!
+                </p>
+            </div>
+
+            <!-- Subject Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 pt-4">
+                <button data-subject="math" class="subject-btn group bg-slate-900/70 hover:bg-purple-900/50 p-6 rounded-2xl neon-border-purple transition-all duration-300 hover:scale-105 flex flex-col items-center justify-center gap-3 border border-purple-500/30">
+                    <div class="w-16 h-16 rounded-full bg-pink-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                        <i class="fas fa-calculator text-3xl text-pink-400"></i>
+                    </div>
+                    <span class="text-xl font-bold text-purple-200">Математика</span>
+                </button>
+
+                <button data-subject="physics" class="subject-btn group bg-slate-900/70 hover:bg-purple-900/50 p-6 rounded-2xl neon-border-purple transition-all duration-300 hover:scale-105 flex flex-col items-center justify-center gap-3 border border-purple-500/30">
+                    <div class="w-16 h-16 rounded-full bg-indigo-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                        <i class="fas fa-atom text-3xl text-indigo-400"></i>
+                    </div>
+                    <span class="text-xl font-bold text-purple-200">Физика</span>
+                </button>
+
+                <button data-subject="chemistry" class="subject-btn group bg-slate-900/70 hover:bg-purple-900/50 p-6 rounded-2xl neon-border-purple transition-all duration-300 hover:scale-105 flex flex-col items-center justify-center gap-3 border border-purple-500/30">
+                    <div class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                        <i class="fas fa-flask text-3xl text-green-400"></i>
+                    </div>
+                    <span class="text-xl font-bold text-purple-200">Химия</span>
+                </button>
+
+                <button data-subject="biology" class="subject-btn group bg-slate-900/70 hover:bg-purple-900/50 p-6 rounded-2xl neon-border-purple transition-all duration-300 hover:scale-105 flex flex-col items-center justify-center gap-3 border border-purple-500/30">
+                    <div class="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                        <i class="fas fa-dna text-3xl text-emerald-400"></i>
+                    </div>
+                    <span class="text-xl font-bold text-purple-200">Биология</span>
+                </button>
+
+                <button data-subject="history" class="subject-btn group bg-slate-900/70 hover:bg-purple-900/50 p-6 rounded-2xl neon-border-purple transition-all duration-300 hover:scale-105 flex flex-col items-center justify-center gap-3 border border-purple-500/30">
+                    <div class="w-16 h-16 rounded-full bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                        <i class="fas fa-landmark text-3xl text-amber-400"></i>
+                    </div>
+                    <span class="text-xl font-bold text-purple-200">История</span>
+                </button>
+
+                <button data-subject="geography" class="subject-btn group bg-slate-900/70 hover:bg-purple-900/50 p-6 rounded-2xl neon-border-purple transition-all duration-300 hover:scale-105 flex flex-col items-center justify-center gap-3 border border-purple-500/30">
+                    <div class="w-16 h-16 rounded-full bg-cyan-500/20 flex items-center justify-center group-hover:scale-110 transition duration-300">
+                        <i class="fas fa-globe-americas text-3xl text-cyan-400"></i>
+                    </div>
+                    <span class="text-xl font-bold text-purple-200">География</span>
+                </button>
+            </div>
+
+            <!-- Start Button -->
+            <div class="pt-6">
+                <button id="start-game-btn" class="hidden bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold text-xl py-4 px-12 rounded-full neon-border-pink transform hover:scale-105 transition-all shadow-lg shadow-pink-500/30">
+                    НАЧАТЬ БИТВУ <i class="fas fa-khanda ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- SCREEN 2: BATTLE SCREEN -->
+        <section id="battle-screen" class="hidden w-full max-w-6xl flex flex-col gap-6">
+            
+            <!-- Top Arena Header (Player vs Monster) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                
+                <!-- Player Side (Left) -->
+                <div id="player-card" class="bg-slate-900/80 p-5 rounded-2xl neon-border-purple relative backdrop-blur-md flex items-center gap-4">
+                    <!-- Damage Popup Container -->
+                    <div id="player-damage-anchor" class="absolute top-2 right-1/2"></div>
+
+                    <!-- Avatar -->
+                    <div class="relative">
+                        <div class="w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-800 border-2 border-pink-400 flex items-center justify-center text-4xl shadow-md overflow-hidden">
+                            <i class="fas fa-user-ninja text-pink-300"></i>
+                        </div>
+                        <span class="absolute -bottom-2 -right-2 bg-pink-600 text-white text-xs font-bold px-2 py-1 rounded-md border border-pink-300">Игрок</span>
+                    </div>
+
+                    <!-- HP and Stats -->
+                    <div class="flex-grow space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-lg text-purple-200">Рыцарь Знаний</span>
+                            <span class="pixel-font text-sm text-pink-400" id="player-hp-text">200 / 200 HP</span>
+                        </div>
+                        <!-- HP Bar -->
+                        <div class="w-full bg-gray-950 h-5 rounded-full overflow-hidden p-0.5 border border-purple-500/50">
+                            <div id="player-hp-bar" class="hp-bar-fill h-full bg-gradient-to-r from-pink-600 to-rose-400 rounded-full w-full"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monster Side (Right) -->
+                <div id="monster-card" class="bg-slate-900/80 p-5 rounded-2xl neon-border-pink relative backdrop-blur-md flex items-center gap-4 flex-row-reverse">
+                    <!-- Damage Popup Container -->
+                    <div id="monster-damage-anchor" class="absolute top-2 left-1/2"></div>
+
+                    <!-- Monster SVG Animated Head -->
+                    <div class="monster-container relative flex-shrink-0">
+                        <div class="w-24 h-24 md:w-28 md:h-28 rounded-2xl bg-slate-950 border-2 border-pink-500 flex items-center justify-center overflow-hidden monster-glowing">
+                            <svg id="monster-svg" class="w-full h-full p-2" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <!-- Monster Horns -->
+                                <path d="M 20 30 Q 10 5 25 10 Q 25 25 35 32 Z" fill="#ec4899" />
+                                <path d="M 80 30 Q 90 5 75 10 Q 75 25 65 32 Z" fill="#ec4899" />
+                                <!-- Head Base -->
+                                <circle cx="50" cy="55" r="38" fill="#4c1d95" stroke="#a855f7" stroke-width="3"/>
+                                <!-- Spikes/Details -->
+                                <path d="M 50 17 L 54 25 L 46 25 Z" fill="#ec4899"/>
+                                <!-- Glowing Eyes (Left) -->
+                                <circle cx="36" cy="48" r="10" fill="#18181b" stroke="#ec4899" stroke-width="2"/>
+                                <circle class="monster-eye-pupil" cx="36" cy="48" r="4" fill="#f43f5e"/>
+                                <!-- Glowing Eyes (Right) -->
+                                <circle cx="64" cy="48" r="10" fill="#18181b" stroke="#ec4899" stroke-width="2"/>
+                                <circle class="monster-eye-pupil" cx="64" cy="48" r="4" fill="#f43f5e"/>
+                                <!-- Scary Eyebrows -->
+                                <path d="M 26 38 L 44 43" stroke="#ec4899" stroke-width="3" stroke-linecap="round"/>
+                                <path d="M 74 38 L 56 43" stroke="#ec4899" stroke-width="3" stroke-linecap="round"/>
+                                <!-- Fanged Mouth -->
+                                <path id="monster-mouth" d="M 32 68 Q 50 82 68 68 Q 50 72 32 68 Z" fill="#090514" stroke="#f43f5e" stroke-width="2"/>
+                                <polygon points="36,68 40,75 44,68" fill="#ffffff" />
+                                <polygon points="56,68 60,75 64,68" fill="#ffffff" />
+                                <polygon points="46,71 50,78 54,71" fill="#ffffff" />
+                            </svg>
+                        </div>
+                        <span class="absolute -bottom-2 -left-2 bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-md border border-purple-300">Монстр</span>
+                    </div>
+
+                    <!-- HP and Stats -->
+                    <div class="flex-grow space-y-2 text-right">
+                        <div class="flex justify-between items-center flex-row-reverse">
+                            <span class="font-bold text-lg text-pink-300" id="monster-name">Пожиратель Тьмы</span>
+                            <span class="pixel-font text-sm text-purple-300" id="monster-hp-text">200 / 200 HP</span>
+                        </div>
+                        <!-- HP Bar -->
+                        <div class="w-full bg-gray-950 h-5 rounded-full overflow-hidden p-0.5 border border-pink-500/50">
+                            <div id="monster-hp-bar" class="hp-bar-fill h-full bg-gradient-to-r from-purple-600 to-pink-500 rounded-full w-full ml-auto"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="bg-slate-900/90 rounded-3xl p-6 md:p-8 neon-border-purple backdrop-blur-lg flex flex-col gap-6 shadow-2xl">
+                
+                <!-- Difficulty Level Selection Header -->
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-purple-800/50 pb-4">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-layer-group text-pink-400 text-xl"></i>
+                        <span class="text-purple-200 font-bold">Выберите уровень сложности для атаки:</span>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 w-full sm:w-auto">
+                        <button data-diff="easy" class="diff-btn bg-emerald-900/40 hover:bg-emerald-800/60 border border-emerald-500 text-emerald-300 px-4 py-2 rounded-xl font-bold text-sm transition duration-200 flex flex-col items-center">
+                            <span>Легкий</span>
+                            <span class="text-xs opacity-75">~20 урона</span>
+                        </button>
+
+                        <button data-diff="medium" class="diff-btn bg-amber-900/40 hover:bg-amber-800/60 border border-amber-500 text-amber-300 px-4 py-2 rounded-xl font-bold text-sm transition duration-200 flex flex-col items-center">
+                            <span>Средний</span>
+                            <span class="text-xs opacity-75">~40 урона</span>
+                        </button>
+
+                        <button data-diff="hard" class="diff-btn bg-rose-900/40 hover:bg-rose-800/60 border border-rose-500 text-rose-300 px-4 py-2 rounded-xl font-bold text-sm transition duration-200 flex flex-col items-center">
+                            <span>Сложный</span>
+                            <span class="text-xs opacity-75">~70 урона</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Active Question Box -->
+                <div class="space-y-4">
+                    <div id="question-header" class="flex justify-between items-center text-xs font-bold text-purple-400 uppercase tracking-widest">
+                        <span id="subject-badge" class="bg-purple-950/80 px-3 py-1 rounded-full border border-purple-700/50">Предмет</span>
+                        <span id="difficulty-badge" class="bg-pink-950/80 px-3 py-1 rounded-full border border-pink-700/50">Уровень</span>
+                    </div>
+
+                    <h2 id="question-text" class="text-xl md:text-2xl font-bold text-white min-h-[60px] flex items-center leading-relaxed">
+                        Загрузка вопроса...
+                    </h2>
+                </div>
+
+                <!-- Answer Variants Grid -->
+                <div id="answers-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Dynamic Buttons Generated in JS -->
+                </div>
+
+                <!-- Feedback Message Banner -->
+                <div id="feedback-banner" class="hidden p-4 rounded-xl text-center font-bold text-lg transition duration-300"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- SCREEN 3: GAME OVER / VICTORY MODAL -->
+        <div id="game-over-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+            <div class="bg-slate-900 neon-border-pink p-8 rounded-3xl max-w-md w-full text-center space-y-6 relative overflow-hidden transform transition-all scale-95">
+                
+                <div id="modal-icon-container" class="w-24 h-24 mx-auto rounded-full bg-pink-500/20 flex items-center justify-center text-5xl text-pink-400">
+                    <i id="modal-icon" class="fas fa-trophy"></i>
+                </div>
+
+                <div class="space-y-2">
+                    <h2 id="modal-title" class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">
+                        ПОБЕДА!
+                    </h2>
+                    <p id="modal-subtitle" class="text-purple-200 text-sm">
+                        Вы успешно одолели чудовище своими знаниями!
+                    </p>
+                </div>
+
+                <!-- Battle Stats Summary -->
+                <div class="bg-slate-950/70 p-4 rounded-2xl border border-purple-800/40 text-left space-y-2 text-sm">
+                    <div class="flex justify-between text-purple-300">
+                        <span>Отвечено вопросов:</span>
+                        <span id="stat-questions-count" class="font-bold text-pink-400">0</span>
+                    </div>
+                    <div class="flex justify-between text-purple-300">
+                        <span>Нанесено урона:</span>
+                        <span id="stat-damage-dealt" class="font-bold text-pink-400">0 HP</span>
+                    </div>
+                    <div class="flex justify-between text-purple-300">
+                        <span>Получено урона:</span>
+                        <span id="stat-damage-taken" class="font-bold text-pink-400">0 HP</span>
+                    </div>
+                </div>
+
+                <!-- Modal Actions -->
+                <div class="flex flex-col gap-3">
+                    <button id="restart-btn" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 rounded-xl transition duration-200">
+                        Сыграть снова
+                    </button>
+                    <button id="change-subject-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-purple-200 font-bold py-3 rounded-xl border border-purple-600/40 transition duration-200">
+                        Выбрать другой предмет
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-4 text-center text-xs text-purple-400/60 z-10">
+        Интерактивная игра-викторина "Битва Знаний" &copy; 2026
+    </footer>
+
+
+    <!-- JAVASCRIPT GAME LOGIC -->
+    <script>
+        // WEB AUDIO SYNTHESIZER (No external audio files needed)
+        class SoundFX {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            }
+
+            playClick() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.05);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+
+            playAttack() {
+                if (!this.enabled) return;
+                this.init();
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, this.ctx.currentTime + 0.25);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playMonsterLaugh() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                [180, 140, 160, 120].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+                    gain.gain.setValueAtTime(0.2, now + idx * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.01, now + (idx + 1) * 0.1);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.1);
+                    osc.stop(now + (idx + 1) * 0.1);
+                });
+            }
+
+            playVictory() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const notes = [261.63, 329.63, 392.00, 523.25];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.12);
+                    gain.gain.setValueAtTime(0.25, now + i * 0.12);
+                    gain.gain.linearRampToValueAtTime(0.01, now + i * 0.12 + 0.3);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.12);
+                    osc.stop(now + i * 0.12 + 0.3);
+                });
+            }
+
+            playDefeat() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const notes = [300, 260, 220, 150];
+                notes.forEach((freq, i) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.18);
+                    gain.gain.setValueAtTime(0.2, now + i * 0.18);
+                    gain.gain.linearRampToValueAtTime(0.01, now + i * 0.18 + 0.25);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + i * 0.18);
+                    osc.stop(now + i * 0.18 + 0.25);
+                });
+            }
+        }
+
+        const sfx = new SoundFX();
+
+        // QUESTION DATABASE BY SUBJECT AND DIFFICULTY
+        const QUESTIONS_DB = {
+            math: {
+                easy: [
+                    { q: "Чему равен корень из 144?", a: ["12", "14", "10", "16"], correct: 0 },
+                    { q: "Найдите периметр квадрата со стороной 7 см.", a: ["28 см", "49 см", "14 см", "21 см"], correct: 0 },
+                    { q: "Сколько градусов составляет прямой угол?", a: ["90°", "180°", "45°", "360°"], correct: 0 },
+                    { q: "Решите уравнение: 3x - 5 = 10", a: ["x = 5", "x = 3", "x = 15", "x = 2"], correct: 0 }
+                ],
+                medium: [
+                    { q: "Чему равна площадь круга радиусом 3 см? (при π ≈ 3.14)", a: ["28.26 см²", "18.84 см²", "9.42 см²", "31.4 см²"], correct: 0 },
+                    { q: "Вычислите: (2³ + 4²) / 3", a: ["8", "6", "10", "12"], correct: 0 },
+                    { q: "Чему равен синус угла 30 градусов?", a: ["0.5", "1", "√3/2", "0"], correct: 0 },
+                    { q: "Решите неравенство: 2x + 4 > 10", a: ["x > 3", "x < 3", "x > 7", "x > 2"], correct: 0 }
+                ],
+                hard: [
+                    { q: "Найдите производную функции f(x) = 3x² + 5x - 2", a: ["6x + 5", "3x + 5", "6x²", "5x"], correct: 0 },
+                    { q: "Чему равен логарифм log₂(32)?", a: ["5", "4", "6", "32"], correct: 0 },
+                    { q: "Вектор A(3, 4). Чему равна его длина?", a: ["5", "7", "25", "1"], correct: 0 },
+                    { q: "Чему сумма бесконечной геометрической прогрессии 1 + 1/2 + 1/4 + 1/8...", a: ["2", "1.5", "3", "Бесконечности"], correct: 0 }
+                ]
+            },
+            physics: {
+                easy: [
+                    { q: "В каких единицах измеряется сила?", a: ["Ньютон", "Джоуль", "Паскаль", "Ватт"], correct: 0 },
+                    { q: "Формула закона Ома для участка цепи:", a: ["I = U / R", "F = ma", "P = UI", "E = mc²"], correct: 0 },
+                    { q: "Какое вещество находится в газообразном состоянии при комнатной температуре?", a: ["Кислород", "Ртуть", "Железо", "Вода"], correct: 0 }
+                ],
+                medium: [
+                    { q: "Чему равно ускорение свободного падения на Земле (приблизительно)?", a: ["9.8 м/с²", "5.2 м/с²", "12.4 м/с²", "1.6 м/с²"], correct: 0 },
+                    { q: "Какая сила удерживает планеты на орбитах вокруг Солнца?", a: ["Гравитационная", "Электромагнитная", "Ядерная", "Трения"], correct: 0 },
+                    { q: "Формула кинетической энергии тела:", a: ["E = (mv²)/2", "E = mgh", "F = kx", "P = F/S"], correct: 0 }
+                ],
+                hard: [
+                    { q: "Какой ученый сформулировал закон полного внутреннего отражения светa?", a: ["Снеллиус", "Ньютон", "Максвелл", "Эйнштейн"], correct: 0 },
+                    { q: "Первое начало термодинамики выражает закон сохранения:", a: ["Энергии", "Импульса", "Массы", "Заряда"], correct: 0 },
+                    { q: "Чему равна скорость света в вакууме?", a: ["~300 000 км/с", "~150 000 км/с", "~1 000 000 км/с", "~30 000 км/с"], correct: 0 }
+                ]
+            },
+            chemistry: {
+                easy: [
+                    { q: "Химическая формула воды:", a: ["H₂O", "CO₂", "NaCl", "O₂"], correct: 0 },
+                    { q: "Какой газ необходим для дыхания человеку?", a: ["Кислород", "Азот", "Углекислый газ", "Водород"], correct: 0 },
+                    { q: "Какое химическое обозначение у железа?", a: ["Fe", "Au", "Ag", "Cu"], correct: 0 }
+                ],
+                medium: [
+                    { q: "Чему равен pH нейтрального водного раствора?", a: ["7", "0", "14", "5"], correct: 0 },
+                    { q: "Какое вещество является самой сильной кислотой из приведенных?", a: ["H₂SO₄", "CH₃COOH", "H₂CO₃", "H₂SiO₃"], correct: 0 },
+                    { q: "Какая связь возникает между металлом и неметаллом?", a: ["Ионная", "Ковалентная полярная", "Металлическая", "Водородная"], correct: 0 }
+                ],
+                hard: [
+                    { q: "Формула бензола:", a: ["C₆H₆", "C₂H₅OH", "CH₄", "C₃H₈"], correct: 0 },
+                    { q: "Какой элемент имеет наибольшую электроотрицательность?", a: ["Фтор (F)", "Кислород (O)", "Хлор (Cl)", "Цезий (Cs)"], correct: 0 },
+                    { q: "Процесс отдачи электронов атомом называется:", a: ["Окисление", "Восстановление", "Гидратация", "Нейтрализация"], correct: 0 }
+                ]
+            },
+            biology: {
+                easy: [
+                    { q: "Какое органелла клетки отвечает за выработку энергии (АТФ)?", a: ["Митохондрия", "Ядро", "Рибосома", "Лизосома"], correct: 0 },
+                    { q: "Процесс образования органических веществ на свету у растений:", a: ["Фотосинтез", "Дыхание", "Транспирация", "Брожение"], correct: 0 },
+                    { q: "Сколько камер в сердце человека?", a: ["4", "2", "3", "5"], correct: 0 }
+                ],
+                medium: [
+                    { q: "Какая кровь течет по легочным венам человека?", a: ["Артериальная", "Венозная", "Смешанная", "Лимфа"], correct: 0 },
+                    { q: "Кто считается отцом генетики?", a: ["Грегор Мендель", "Чарльз Дарвин", "Роберт Гук", "Иван Павлов"], correct: 0 },
+                    { q: "Какой витамин вырабатывается в коже под действием солнца?", a: ["Витамин D", "Витамин C", "Витамин A", "Витамин B12"], correct: 0 }
+                ],
+                hard: [
+                    { q: "Сколько пар хромосом содержит соматическая клетка человека?", a: ["23 пары", "46 пар", "12 пар", "22 пары"], correct: 0 },
+                    { q: "Какая аминокислота кодируется стартовым кодоном AUG?", a: ["Метионин", "Аланин", "Лизин", "Валин"], correct: 0 },
+                    { q: "Какой гормон понижает уровень сахара в крови?", a: ["Инсулин", "Глюкагон", "Адреналин", "Тироксин"], correct: 0 }
+                ]
+            },
+            history: {
+                easy: [
+                    { q: "В каком году произошел первый полет человека в космос?", a: ["1961", "1945", "1957", "1970"], correct: 0 },
+                    { q: "Кто был первым императором Всероссийским?", a: ["Пётр I", "Иван Грозный", "Екатерина II", "Александр I"], correct: 0 },
+                    { q: "Какое древнее государство построило Пирамиды и Сфинкса?", a: ["Египет", "Рим", "Греция", "Вавилон"], correct: 0 }
+                ],
+                medium: [
+                    { q: "В каком году началась Вторая мировая война?", a: ["1939", "1941", "1914", "1938"], correct: 0 },
+                    { q: "Какой парусник возглавлял экспедицию Фернана Магеллана?", a: ["Виктория", "Санта-Мария", "Нинья", "Пинта"], correct: 0 },
+                    { q: "При каком правителе было отменено крепостное право в России (1861 г.)?", a: ["Александр II", "Николай I", "Александр III", "Николай II"], correct: 0 }
+                ],
+                hard: [
+                    { q: "В каком году произошла Куликовская битва?", a: ["1380", "1242", "1480", "1552"], correct: 0 },
+                    { q: "Кто возглавлял Францию в период Якобинской диктатуры?", a: ["Максимилиан Робеспьер", "Наполеон Бонапарт", "Людовик XVI", "Жан-Поль Марат"], correct: 0 },
+                    { q: "Какое событие произошло в 1054 году?", a: ["Раскол христианской церкви", "Падение Римской империи", "Столетняя война", "Крещение Руси"], correct: 0 }
+                ]
+            },
+            geography: {
+                easy: [
+                    { q: "Какой самый большой океан на Земле?", a: ["Тихий", "Атлантический", "Индийский", "Северный Ледовитый"], correct: 0 },
+                    { q: "Столица Франции:", a: ["Париж", "Лондон", "Берлин", "Рим"], correct: 0 },
+                    { q: "Самый маленький материк на планете:", a: ["Австралия", "Антарктида", "Евразия", "Южная Америка"], correct: 0 }
+                ],
+                medium: [
+                    { q: "Какое озеро является самым глубоким в мире?", a: ["Байкал", "Виктория", "Верхнее", "Каспийское море"], correct: 0 },
+                    { q: "Какая горная система является самой высокой в мире?", a: ["Гималаи", "Анды", "Альпы", "Урал"], correct: 0 },
+                    { q: "Столица Японии:", a: ["Токио", "Киото", "Пекин", "Сеул"], correct: 0 }
+                ],
+                hard: [
+                    { q: "Какая река является самой протяженной в мире?", a: ["Амазонка", "Нил", "Янцзы", "Миссисипи"], correct: 0 },
+                    { q: "Какое государство не имеет выхода к морю?", a: ["Боливия", "Вьетнам", "Колумбия", "Швеция"], correct: 0 },
+                    { q: "Какой пролив отделяет Азию от Северной Америки?", a: ["Берингов пролив", "Гибралтарский", "Магелланов", "Босфор"], correct: 0 }
+                ]
+            }
+        };
+
+        // GAME STATE
+        let state = {
+            selectedSubject: null,
+            selectedDifficulty: 'easy',
+            playerHP: 200,
+            monsterHP: 200,
+            maxHP: 200,
+            currentQuestion: null,
+            askedQuestions: new Set(),
+            stats: {
+                questionsAnswered: 0,
+                damageDealt: 0,
+                damageTaken: 0
+            }
+        };
+
+        // UI DOM ELEMENTS
+        const selectScreen = document.getElementById('select-screen');
+        const battleScreen = document.getElementById('battle-screen');
+        const gameOverModal = document.getElementById('game-over-modal');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const soundToggleBtn = document.getElementById('sound-toggle');
+        const soundIcon = document.getElementById('sound-icon');
+
+        const playerHpBar = document.getElementById('player-hp-bar');
+        const playerHpText = document.getElementById('player-hp-text');
+        const monsterHpBar = document.getElementById('monster-hp-bar');
+        const monsterHpText = document.getElementById('monster-hp-text');
+        
+        const questionText = document.getElementById('question-text');
+        const answersGrid = document.getElementById('answers-grid');
+        const subjectBadge = document.getElementById('subject-badge');
+        const difficultyBadge = document.getElementById('difficulty-badge');
+        const feedbackBanner = document.getElementById('feedback-banner');
+
+        const monsterSvg = document.getElementById('monster-svg');
+        const monsterContainer = document.querySelector('.monster-container');
+
+        // SOUND TOGGLE EVENT
+        soundToggleBtn.addEventListener('click', () => {
+            sfx.enabled = !sfx.enabled;
+            soundIcon.className = sfx.enabled ? "fas fa-volume-up text-xl" : "fas fa-volume-mute text-xl";
+        });
+
+        // SUBJECT SELECTION LISTENERS
+        document.querySelectorAll('.subject-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sfx.playClick();
+                document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('neon-border-pink', 'scale-105'));
+                btn.classList.add('neon-border-pink', 'scale-105');
+                state.selectedSubject = btn.dataset.subject;
+                startGameBtn.classList.remove('hidden');
+            });
+        });
+
+        // DIFFICULTY SELECTOR LISTENERS
+        document.querySelectorAll('.diff-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                sfx.playClick();
+                state.selectedDifficulty = btn.dataset.diff;
+                updateDifficultyButtonsUI();
+                loadNewQuestion();
+            });
+        });
+
+        function updateDifficultyButtonsUI() {
+            document.querySelectorAll('.diff-btn').forEach(btn => {
+                if (btn.dataset.diff === state.selectedDifficulty) {
+                    btn.classList.add('ring-2', 'ring-pink-400', 'scale-105');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-pink-400', 'scale-105');
+                }
+            });
+        }
+
+        // START GAME EVENT
+        startGameBtn.addEventListener('click', () => {
+            sfx.playClick();
+            resetGame();
+            selectScreen.classList.add('hidden');
+            battleScreen.classList.remove('hidden');
+            loadNewQuestion();
+        });
+
+        // RESTART & CHANGE SUBJECT EVENTS
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            sfx.playClick();
+            gameOverModal.classList.add('hidden');
+            resetGame();
+            loadNewQuestion();
+        });
+
+        document.getElementById('change-subject-btn').addEventListener('click', () => {
+            sfx.playClick();
+            gameOverModal.classList.add('hidden');
+            battleScreen.classList.add('hidden');
+            selectScreen.classList.remove('hidden');
+            startGameBtn.classList.add('hidden');
+            document.querySelectorAll('.subject-btn').forEach(b => b.classList.remove('neon-border-pink', 'scale-105'));
+        });
+
+        // RESET GAME FUNCTION
+        function resetGame() {
+            state.playerHP = 200;
+            state.monsterHP = 200;
+            state.askedQuestions.clear();
+            state.stats = { questionsAnswered: 0, damageDealt: 0, damageTaken: 0 };
+            state.selectedDifficulty = 'easy';
+            
+            updateHPUI();
+            updateDifficultyButtonsUI();
+            feedbackBanner.classList.add('hidden');
+        }
+
+        // UPDATE HP BARS & TEXT
+        function updateHPUI() {
+            const playerPct = Math.max(0, (state.playerHP / state.maxHP) * 100);
+            const monsterPct = Math.max(0, (state.monsterHP / state.maxHP) * 100);
+
+            playerHpBar.style.width = `${playerPct}%`;
+            playerHpText.innerText = `${Math.max(0, state.playerHP)} / ${state.maxHP} HP`;
+
+            monsterHpBar.style.width = `${monsterPct}%`;
+            monsterHpText.innerText = `${Math.max(0, state.monsterHP)} / ${state.maxHP} HP`;
+        }
+
+        // LOAD QUESTION FUNCTION
+        function loadNewQuestion() {
+            feedbackBanner.classList.add('hidden');
+            const subjectQuestions = QUESTIONS_DB[state.selectedSubject][state.selectedDifficulty];
+            
+            // Filter unasked questions
+            let availableQuestions = subjectQuestions.filter(q => !state.askedQuestions.has(q.q));
+
+            // If all asked in this difficulty, clear cache for this pool
+            if (availableQuestions.length === 0) {
+                subjectQuestions.forEach(q => state.askedQuestions.delete(q.q));
+                availableQuestions = subjectQuestions;
+            }
+
+            const randomQ = availableQuestions[Math.floor(Math.random() * availableQuestions.length)];
+            state.currentQuestion = randomQ;
+            state.askedQuestions.add(randomQ.q);
+
+            // Update Header Labels
+            const subjectNames = {
+                math: 'Математика', physics: 'Физика', chemistry: 'Химия',
+                biology: 'Биология', history: 'История', geography: 'География'
+            };
+            const diffNames = { easy: 'Лёгкий (~20 HP)', medium: 'Средний (~40 HP)', hard: 'Сложный (~70 HP)' };
+
+            subjectBadge.innerText = subjectNames[state.selectedSubject];
+            difficultyBadge.innerText = diffNames[state.selectedDifficulty];
+
+            questionText.innerText = randomQ.q;
+
+            // Render Shuffled Options
+            answersGrid.innerHTML = '';
+            
+            // Create options array with original index tracking
+            const options = randomQ.a.map((ans, idx) => ({ text: ans, originalIndex: idx }));
+            // Shuffle
+            options.sort(() => Math.random() - 0.5);
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "answer-btn bg-purple-950/50 hover:bg-purple-800/60 border border-purple-600/40 hover:border-pink-500 text-left p-4 rounded-2xl transition duration-200 text-purple-100 font-medium hover:scale-[1.01] flex items-center justify-between group";
+                btn.innerHTML = `
+                    <span>${opt.text}</span>
+                    <i class="fas fa-chevron-right text-pink-500 opacity-0 group-hover:opacity-100 transition"></i>
+                `;
+                btn.addEventListener('click', () => handleAnswerSelect(opt.originalIndex, btn));
+                answersGrid.appendChild(btn);
+            });
+        }
+
+        // HANDLE ANSWER SELECTION
+        function handleAnswerSelect(selectedIndex, selectedBtn) {
+            // Disable all answer buttons temporary
+            const buttons = answersGrid.querySelectorAll('.answer-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            state.stats.questionsAnswered++;
+
+            const isCorrect = selectedIndex === state.currentQuestion.correct;
+            const damageMap = { easy: 20, medium: 40, hard: 70 };
+            const baseDamage = damageMap[state.selectedDifficulty];
+
+            if (isCorrect) {
+                // CORRECT ANSWER: PLAYER ATTACKS MONSTER
+                selectedBtn.classList.add('bg-emerald-950/80', 'border-emerald-500', 'text-emerald-200');
+                sfx.playAttack();
+
+                // Player Attack Animation
+                document.getElementById('player-card').classList.add('animate-player-attack');
+                setTimeout(() => document.getElementById('player-card').classList.remove('animate-player-attack'), 400);
+
+                // Monster Damage
+                const damage = baseDamage + Math.floor(Math.random() * 5);
+                state.monsterHP -= damage;
+                state.stats.damageDealt += damage;
+                
+                showDamagePopup('monster-damage-anchor', `-${damage}`, 'text-pink-500');
+                updateHPUI();
+
+                showFeedback("ВЕРНО! Вы нанесли сокрушительный урон монстру!", "bg-emerald-900/60 border-emerald-500 text-emerald-200");
+
+            } else {
+                // WRONG ANSWER: MONSTER ATTACKS PLAYER
+                selectedBtn.classList.add('bg-rose-950/80', 'border-rose-500', 'text-rose-200');
+                
+                // Highlight correct answer
+                buttons.forEach(b => {
+                    if (b.innerText.includes(state.currentQuestion.a[state.currentQuestion.correct])) {
+                        b.classList.add('bg-emerald-950/50', 'border-emerald-500/50');
+                    }
+                });
+
+                sfx.playMonsterLaugh();
+
+                // Monster Attack Animation & Laugh
+                monsterContainer.classList.add('monster-laughing');
+                document.getElementById('monster-card').classList.add('animate-monster-attack');
+                battleScreen.classList.add('animate-shake');
+
+                setTimeout(() => {
+                    monsterContainer.classList.remove('monster-laughing');
+                    document.getElementById('monster-card').classList.remove('animate-monster-attack');
+                    battleScreen.classList.remove('animate-shake');
+                }, 500);
+
+                // Player Damage
+                const damage = baseDamage;
+                state.playerHP -= damage;
+                state.stats.damageTaken += damage;
+
+                showDamagePopup('player-damage-anchor', `-${damage}`, 'text-rose-500');
+                updateHPUI();
+
+                showFeedback(`ОШИБКА! Правильный ответ: ${state.currentQuestion.a[state.currentQuestion.correct]}`, "bg-rose-900/60 border-rose-500 text-rose-200");
+            }
+
+            // Check End Game Condition or Load Next Question
+            setTimeout(() => {
+                if (state.monsterHP <= 0 || state.playerHP <= 0) {
+                    endGame();
+                } else {
+                    loadNewQuestion();
+                }
+            }, 1800);
+        }
+
+        // SHOW DAMAGE POPUP ANIMATION
+        function showDamagePopup(anchorId, text, colorClass) {
+            const anchor = document.getElementById(anchorId);
+            const popup = document.createElement('div');
+            popup.className = `damage-popup pixel-font text-2xl ${colorClass}`;
+            popup.innerText = text;
+            anchor.appendChild(popup);
+
+            setTimeout(() => popup.remove(), 1000);
+        }
+
+        // SHOW FEEDBACK BANNER
+        function showFeedback(text, bgClass) {
+            feedbackBanner.className = `p-4 rounded-xl text-center font-bold text-sm md:text-base border ${bgClass}`;
+            feedbackBanner.innerText = text;
+            feedbackBanner.classList.remove('hidden');
+        }
+
+        // END GAME MODAL
+        function endGame() {
+            const isVictory = state.monsterHP <= 0;
+            
+            document.getElementById('stat-questions-count').innerText = state.stats.questionsAnswered;
+            document.getElementById('stat-damage-dealt').innerText = `${state.stats.damageDealt} HP`;
+            document.getElementById('stat-damage-taken').innerText = `${state.stats.damageTaken} HP`;
+
+            const modalTitle = document.getElementById('modal-title');
+            const modalSubtitle = document.getElementById('modal-subtitle');
+            const modalIconContainer = document.getElementById('modal-icon-container');
+            const modalIcon = document.getElementById('modal-icon');
+
+            if (isVictory) {
+                sfx.playVictory();
+                modalTitle.innerText = "ПОБЕДА!";
+                modalTitle.className = "text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300";
+                modalSubtitle.innerText = "Вы уничтожили монстра своей эрудицией и разумом!";
+                modalIconContainer.className = "w-24 h-24 mx-auto rounded-full bg-emerald-500/20 flex items-center justify-center text-5xl text-emerald-400 border border-emerald-500/40";
+                modalIcon.className = "fas fa-trophy";
+            } else {
+                sfx.playDefeat();
+                modalTitle.innerText = "ПОРАЖЕНИЕ...";
+                modalTitle.className = "text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-red-400";
+                modalSubtitle.innerText = "Монстр оказался сильнее на этот раз. Попробуйте еще раз!";
+                modalIconContainer.className = "w-24 h-24 mx-auto rounded-full bg-rose-500/20 flex items-center justify-center text-5xl text-rose-500 border border-rose-500/40";
+                modalIcon.className = "fas fa-skull-crossbones";
+            }
+
+            gameOverModal.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
